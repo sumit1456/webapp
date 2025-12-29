@@ -2,6 +2,7 @@ package com.rasthrabhasha.student;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rasthrabhasha.application.ExamApplication;
 import com.rasthrabhasha.exam.Exam;
 
@@ -19,7 +20,7 @@ public class Student {
 	
 	@Id
 	 @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long student_id;
+	private long studentId;
 	
 
 	@Column
@@ -32,6 +33,7 @@ public class Student {
 	
 	
 	@OneToMany(mappedBy = "student")
+	@JsonIgnore
     private List<ExamApplication> applications;
 
 	
@@ -49,13 +51,13 @@ public class Student {
 	}
 
 
-	public long getStudent_id() {
-		return student_id;
+	public long getStudentId() {
+		return studentId;
 	}
 
 
-	public void setStudent_id(long student_id) {
-		this.student_id = student_id;
+	public void setStudent_id(long studentId) {
+		this.studentId = studentId;
 	}
 
 

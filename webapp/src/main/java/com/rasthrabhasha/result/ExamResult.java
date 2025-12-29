@@ -1,9 +1,7 @@
 package com.rasthrabhasha.result;
 
-import java.time.LocalDateTime;
-
 import com.rasthrabhasha.application.ExamApplication;
-
+import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "exam_result")
 public class ExamResult {
@@ -22,10 +19,10 @@ public class ExamResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ✅ Correct relationship
     @OneToOne(optional = false)
     @JoinColumn(
         name = "application_id",
-        referencedColumnName = "application_id",
         nullable = false,
         unique = true
     )
@@ -35,5 +32,38 @@ public class ExamResult {
     private String resultData;
 
     private LocalDateTime publishedAt;
-}
 
+    // ===== Getters & Setters =====
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public ExamApplication getApplication() {
+        return application;
+    }
+
+    public void setApplication(ExamApplication application) {
+        this.application = application;
+    }
+
+    public String getResultData() {
+        return resultData;
+    }
+
+    public void setResultData(String resultData) {
+        this.resultData = resultData;
+    }
+
+    public LocalDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(LocalDateTime publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+}

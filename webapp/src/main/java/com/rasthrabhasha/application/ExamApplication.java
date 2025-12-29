@@ -16,15 +16,55 @@ public class ExamApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long application_id;
+    private Long applicationId;
 
 
     @ManyToOne
-    @JoinColumn(name = "exam_no")
+    @JoinColumn(name = "examNo")
     private Exam exam;
     
     
-    @ManyToOne
+    public Long getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(Long applicationId) {
+		this.applicationId = applicationId;
+	}
+
+	public Exam getExam() {
+		return exam;
+	}
+
+	public void setExam(Exam exam) {
+		this.exam = exam;
+	}
+
+	public Student getStudent() {
+		return student;
+	}
+
+	public void setStudent(Student student) {
+		this.student = student;
+	}
+
+	public String getFormData() {
+		return formData;
+	}
+
+	public void setFormData(String formData) {
+		this.formData = formData;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	@ManyToOne
     private Student student;
 
     @Column(columnDefinition = "json")
