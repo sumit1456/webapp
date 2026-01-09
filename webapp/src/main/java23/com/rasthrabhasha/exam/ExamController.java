@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rasthrabhasha.exception.EntityNotFoundException;
@@ -21,7 +20,7 @@ public class ExamController {
 	ExamService es;
 
 	@PostMapping("/addExam")
-	public String addExam(@RequestBody Exam exam) {
+	public String addExam(Exam exam) {
 		er.save(exam);
 		return "Exam has been added";
 	}

@@ -1,25 +1,29 @@
 package com.rasthrabhasha.result;
 
-import java.util.Optional;
-
+import java.util.List; // Import List
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-
 @Repository
 public interface ExamResultRepository extends JpaRepository<ExamResult, Long>{
 
-	
-	@Query("""
-		       SELECT a
-		       FROM ExamResult a
-		       WHERE a.application.applicationId = :applicationId
-		       """)
-		ExamResult findByApplicationId(@Param("applicationId") Long applicationId);
-	
-	
-	
+    // Existing Query (Keep this)
+    @Query("""
+              SELECT a
+              FROM ExamResult a
+              WHERE a.application.applicationId = :applicationId
+              """)
+    ExamResult findByApplicationId(@Param("applicationId") Long applicationId);
+
+    // --- ADD THIS NEW QUERY ---
+    // This allows fetching all results for a specific student
+    @Query("""
+              SELECT r
+              FROM ExamResult r
+              WHERE r.application.student.studentId = :studentId
+              """)
+    List<ExamResult> findByStudentId(@Param("studentId") Long studentId);
 
 }
