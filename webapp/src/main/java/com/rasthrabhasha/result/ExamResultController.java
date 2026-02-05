@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rasthrabhasha.exception.EntityNotFoundException;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 public class ExamResultController {
 
     @Autowired

@@ -21,17 +21,17 @@ public class ExamResult {
 
     // ✅ Correct relationship
     @OneToOne(optional = false)
-    @JoinColumn(
-        name = "application_id",
-        nullable = false,
-        unique = true
-    )
+    @JoinColumn(name = "application_id", nullable = false, unique = true)
     private ExamApplication application;
 
     @Column(columnDefinition = "json")
     private String resultData;
 
     private LocalDateTime publishedAt;
+
+    private Double totalMarks;
+
+    private Double percentage;
 
     // ===== Getters & Setters =====
 
@@ -65,5 +65,21 @@ public class ExamResult {
 
     public void setPublishedAt(LocalDateTime publishedAt) {
         this.publishedAt = publishedAt;
+    }
+
+    public Double getTotalMarks() {
+        return totalMarks;
+    }
+
+    public void setTotalMarks(Double totalMarks) {
+        this.totalMarks = totalMarks;
+    }
+
+    public Double getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(Double percentage) {
+        this.percentage = percentage;
     }
 }

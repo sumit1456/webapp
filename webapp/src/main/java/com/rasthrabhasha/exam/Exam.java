@@ -10,23 +10,40 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
-
+import jakarta.persistence.Column;
 
 @Entity
 public class Exam {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long examNo;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long examNo;
 
-    private String exam_name;
+	private String exam_name;
 
-    private int no_of_papers;
+	private int no_of_papers;
 
-    private double exam_fees;
+	private double exam_fees;
 
-    public long getExamNo() {
+	@Column(columnDefinition = "json")
+	private String papers; // Stores JSON: [{"name": "Paper 1", "maxMarks": 100}, ...]
+	
+	@Column(columnDefinition = "json")
+	private String exam_details; // To store {"center": "...", "session": "...", "description": "..."}
+
+	public String getExam_details() {
+		return exam_details;
+	}
+
+	public void setExam_details(String exam_details) {
+		this.exam_details = exam_details;
+	}
+
+	public void setExamNo(long examNo) {
+		this.examNo = examNo;
+	}
+
+	public long getExamNo() {
 		return examNo;
 	}
 
@@ -58,6 +75,14 @@ public class Exam {
 		this.exam_fees = exam_fees;
 	}
 
+	public String getPapers() {
+		return papers;
+	}
+
+	public void setPapers(String papers) {
+		this.papers = papers;
+	}
+
 	public List<ExamApplication> getApplications() {
 		return applications;
 	}
@@ -67,13 +92,14 @@ public class Exam {
 	}
 
 	@OneToMany(mappedBy = "exam")
-	@JsonIgnore 
-    private List<ExamApplication> applications;
+	@JsonIgnore
+	private List<ExamApplication> applications;
 
 	@Override
 	public String toString() {
-		return "Exam [exam_name=" + exam_name + ", no_of_papers=" + no_of_papers + ", exam_fees=" + exam_fees + "]";
+		return "Exam [exam_name=" + exam_name + ", no_of_papers=" + no_of_papers + ", exam_fees=" + exam_fees
+				+ ", papers=" + papers + "]";
 	}
 
-    // getters & setters
+	// getters & setters
 }

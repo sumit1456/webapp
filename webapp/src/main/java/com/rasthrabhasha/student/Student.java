@@ -17,7 +17,7 @@ import jakarta.persistence.OneToMany;
 public class Student {
 
 	
-	
+	//Student Entity
 	@Id
 	 @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long studentId;
