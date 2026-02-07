@@ -1,105 +1,172 @@
 package com.rasthrabhasha.exam;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rasthrabhasha.application.ExamApplication;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Column;
 
 @Entity
 public class Exam {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long examNo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long examNo;
 
-	private String exam_name;
+    // ===== EXISTING FIELDS (UNCHANGED) =====
 
-	private int no_of_papers;
+    private String exam_name;
 
-	private double exam_fees;
+    private int no_of_papers;
 
-	@Column(columnDefinition = "json")
-	private String papers; // Stores JSON: [{"name": "Paper 1", "maxMarks": 100}, ...]
-	
-	@Column(columnDefinition = "json")
-	private String exam_details; // To store {"center": "...", "session": "...", "description": "..."}
+    private double exam_fees;
 
-	public String getExam_details() {
-		return exam_details;
-	}
+    @Column(columnDefinition = "json")
+    private String papers; 
+    // [{"code":"P1","name":"Paper I","maxMarks":100}, ...]
 
-	public void setExam_details(String exam_details) {
-		this.exam_details = exam_details;
-	}
+    @Column(columnDefinition = "json")
+    private String exam_details; 
+    // exam-specific descriptive details
 
-	public void setExamNo(long examNo) {
-		this.examNo = examNo;
-	}
+    // ===== NEW FIELDS (ADDED) =====
 
-	public long getExamNo() {
-		return examNo;
-	}
+    @Column(unique = true, nullable = false)
+    private String exam_code; 
+    // PRAVIN_HINDI, PRABODH_HINDI
 
-	public void setExam_no(long exam_n0) {
-		this.examNo = exam_n0;
-	}
+    private LocalDate application_start_date;
+    private LocalDate application_end_date;
 
-	public String getExam_name() {
-		return exam_name;
-	}
+    private LocalDate exam_start_date;
+    private LocalDate exam_end_date;
 
-	public void setExam_name(String exam_name) {
-		this.exam_name = exam_name;
-	}
+    // ✅ STATUS AS STRING
+    private String status;
+    // DRAFT / PUBLISHED / CLOSED / RESULT_PUBLISHED
 
-	public int getNo_of_papers() {
-		return no_of_papers;
-	}
+    // ===== RELATIONSHIPS =====
 
-	public void setNo_of_papers(int no_of_papers) {
-		this.no_of_papers = no_of_papers;
-	}
+    @OneToMany(mappedBy = "exam")
+    @JsonIgnore
+    private List<ExamApplication> applications;
 
-	public double getExam_fees() {
-		return exam_fees;
-	}
+    // ===== GETTERS & SETTERS =====
 
-	public void setExam_fees(double exam_fees) {
-		this.exam_fees = exam_fees;
-	}
+    public long getExamNo() {
+        return examNo;
+    }
 
-	public String getPapers() {
-		return papers;
-	}
+    public void setExamNo(long examNo) {
+        this.examNo = examNo;
+    }
 
-	public void setPapers(String papers) {
-		this.papers = papers;
-	}
+    public String getExam_name() {
+        return exam_name;
+    }
 
-	public List<ExamApplication> getApplications() {
-		return applications;
-	}
+    public void setExam_name(String exam_name) {
+        this.exam_name = exam_name;
+    }
 
-	public void setApplications(List<ExamApplication> applications) {
-		this.applications = applications;
-	}
+    public int getNo_of_papers() {
+        return no_of_papers;
+    }
 
-	@OneToMany(mappedBy = "exam")
-	@JsonIgnore
-	private List<ExamApplication> applications;
+    public void setNo_of_papers(int no_of_papers) {
+        this.no_of_papers = no_of_papers;
+    }
 
-	@Override
-	public String toString() {
-		return "Exam [exam_name=" + exam_name + ", no_of_papers=" + no_of_papers + ", exam_fees=" + exam_fees
-				+ ", papers=" + papers + "]";
-	}
+    public double getExam_fees() {
+        return exam_fees;
+    }
 
-	// getters & setters
+    public void setExam_fees(double exam_fees) {
+        this.exam_fees = exam_fees;
+    }
+
+    public String getPapers() {
+        return papers;
+    }
+
+    public void setPapers(String papers) {
+        this.papers = papers;
+    }
+
+    public String getExam_details() {
+        return exam_details;
+    }
+
+    public void setExam_details(String exam_details) {
+        this.exam_details = exam_details;
+    }
+
+    public String getExam_code() {
+        return exam_code;
+    }
+
+    public void setExam_code(String exam_code) {
+        this.exam_code = exam_code;
+    }
+
+    public LocalDate getApplication_start_date() {
+        return application_start_date;
+    }
+
+    public void setApplication_start_date(LocalDate application_start_date) {
+        this.application_start_date = application_start_date;
+    }
+
+    public LocalDate getApplication_end_date() {
+        return application_end_date;
+    }
+
+    public void setApplication_end_date(LocalDate application_end_date) {
+        this.application_end_date = application_end_date;
+    }
+
+    public LocalDate getExam_start_date() {
+        return exam_start_date;
+    }
+
+    public void setExam_start_date(LocalDate exam_start_date) {
+        this.exam_start_date = exam_start_date;
+    }
+
+    public LocalDate getExam_end_date() {
+        return exam_end_date;
+    }
+
+    public void setExam_end_date(LocalDate exam_end_date) {
+        this.exam_end_date = exam_end_date;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<ExamApplication> getApplications() {
+        return applications;
+    }
+
+    public void setApplications(List<ExamApplication> applications) {
+        this.applications = applications;
+    }
+
+    @Override
+    public String toString() {
+        return "Exam [exam_name=" + exam_name + ", no_of_papers=" + no_of_papers +
+                ", exam_fees=" + exam_fees + ", papers=" + papers + "]";
+    }
 }
