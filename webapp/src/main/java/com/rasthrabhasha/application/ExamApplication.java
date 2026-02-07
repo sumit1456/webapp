@@ -20,7 +20,7 @@ public class ExamApplication {
 
 
     @ManyToOne
-    @JoinColumn(name = "examNo")
+    @JoinColumn(name = "exam_no")
     private Exam exam;
     
     
