@@ -66,6 +66,7 @@ public class School {
 
     @OneToMany(mappedBy = "school")
     @JsonIgnoreProperties("school")
+    
     private List<Student> students;
 
    

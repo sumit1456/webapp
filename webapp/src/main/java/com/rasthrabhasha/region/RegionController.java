@@ -25,6 +25,7 @@ public class RegionController {
 public ResponseEntity<?> addRegion(@RequestBody Map<String, Object> payload) {
     // 1. Log the RAW map to see what Spring actually received
     System.out.println("RAW PAYLOAD RECEIVED: " + payload);
+   
     // 2. Manually extract the value
     String name = (String) payload.get("regionName");
     System.out.println("EXTRACTED NAME: " + name);
