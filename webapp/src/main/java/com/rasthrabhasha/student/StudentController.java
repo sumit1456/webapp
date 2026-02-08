@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rasthrabhasha.exception.EntityNotFoundException;
@@ -38,9 +41,19 @@ public class StudentController {
 	}
 
 	@PostMapping("/addStudent")
-	public String addStudent(@RequestBody Student st) {
-		return sr.addStudent(st);
-
+	public ResponseEntity<Student> addStudent(
+	        @RequestParam Long schoolId, // Matches ?schoolId= in frontend
+	        @RequestBody Student st) {
+	    
+	    // Debugging logs
+	    System.out.println("DEBUG: Username received -> " + st.getUsername());
+	    System.out.println("DEBUG: Student Object -> " + st);
+	    
+	    // Save via Service (assuming sr is your service/repository)
+	    Student savedStudent = sr.addStudent(schoolId, st);
+	    
+	    // Returns 201 Created with the saved object
+	    return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
 	}
 
 }

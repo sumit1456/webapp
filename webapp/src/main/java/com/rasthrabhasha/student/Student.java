@@ -3,14 +3,18 @@ package com.rasthrabhasha.student;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rasthrabhasha.application.ExamApplication;
-import com.rasthrabhasha.exam.Exam;
+import com.rasthrabhasha.school.School;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -35,11 +39,32 @@ public class Student {
 	@OneToMany(mappedBy = "student")
 	@JsonIgnore
     private List<ExamApplication> applications;
+	
+	
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "school_id", nullable = false)
+	@JsonIgnoreProperties("students")
+	private School school;
 
 	
 
 
 	
+
+	public School getSchool() {
+		return school;
+	}
+
+
+	public void setSchool(School school) {
+		this.school = school;
+	}
+
+
+	public void setStudentId(long studentId) {
+		this.studentId = studentId;
+	}
+
 
 	public List<ExamApplication> getApplications() {
 		return applications;
