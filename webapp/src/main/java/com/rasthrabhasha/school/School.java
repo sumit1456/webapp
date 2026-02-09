@@ -2,6 +2,7 @@ package com.rasthrabhasha.school;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rasthrabhasha.examcentre.ExamCentre;
 import com.rasthrabhasha.student.Student;
@@ -19,16 +20,17 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "school")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class School {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long schoolId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long schoolId;
 
-    @Column(nullable = false)
-    private String schoolName;
+	@Column(nullable = false)
+	private String schoolName;
 
-    public Long getSchoolId() {
+	public Long getSchoolId() {
 		return schoolId;
 	}
 
@@ -61,13 +63,12 @@ public class School {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "centre_id", nullable = false)
-    private ExamCentre examCentre;
+	@JoinColumn(name = "centre_id", nullable = false)
+	@JsonIgnoreProperties({ "schools", "hibernateLazyInitializer", "handler" })
+	private ExamCentre examCentre;
 
-    @OneToMany(mappedBy = "school")
-    @JsonIgnoreProperties("school")
-    
-    private List<Student> students;
+	@OneToMany(mappedBy = "school")
+	@JsonIgnore
+	private List<Student> students;
 
-   
 }

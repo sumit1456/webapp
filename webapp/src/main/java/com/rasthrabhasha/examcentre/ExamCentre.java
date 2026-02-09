@@ -3,7 +3,6 @@ package com.rasthrabhasha.examcentre;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rasthrabhasha.region.Region;
 import com.rasthrabhasha.school.School;
 
@@ -24,21 +23,21 @@ public class ExamCentre {
 
 	@Override
 	public String toString() {
-	    return "ExamCentre [centreId=" + centreId + ", centreCode=" + centreCode + 
-	           ", centreName=" + centreName + ", region=" + (region != null ? region.getRegionName() : "null") + "]";
+		return "ExamCentre [centreId=" + centreId + ", centreCode=" + centreCode +
+				", centreName=" + centreName + ", region=" + (region != null ? region.getRegionName() : "null") + "]";
 	}
 
 	@Id
-    
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long centreId;
 
-    @Column(nullable = false, unique = true)
-    private String centreCode;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long centreId;
 
-    private String centreName;
+	@Column(nullable = false, unique = true)
+	private String centreCode;
 
-    public Long getCentreId() {
+	private String centreName;
+
+	public Long getCentreId() {
 		return centreId;
 	}
 
@@ -79,12 +78,12 @@ public class ExamCentre {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "region_id", nullable = false)
-    private Region region;
+	@JoinColumn(name = "region_id", nullable = false)
+	private Region region;
 
-    @OneToMany(mappedBy = "examCentre")
-    @JsonIgnoreProperties("examCentre") 
-    private List<School> schools;
+	@OneToMany(mappedBy = "examCentre")
+	@JsonIgnore
+	private List<School> schools;
 
-    // getters & setters
+	// getters & setters
 }
