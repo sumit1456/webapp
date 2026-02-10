@@ -1,7 +1,6 @@
 package com.rasthrabhasha.student;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rasthrabhasha.exception.EntityNotFoundException;
+import com.rasthrabhasha.dto.StudentDTO;
 
 @RestController
 public class StudentController {
@@ -20,23 +19,14 @@ public class StudentController {
 	@Autowired
 	StudentService sr;
 
-	@Autowired
-	StudentRepository str;
-
 	@GetMapping("/getStudent")
-	public Student getStudent(long id) {
-
-		Optional<Student> student = str.findById(id);
-		if (student.isEmpty()) {
-			throw new EntityNotFoundException("Invalid Student id");
-		}
-
-		return student.get();
+	public StudentDTO getStudent(long id) {
+		return sr.getStudentDTO(id);
 	}
 
 	@GetMapping("/getAllStudents")
-	public List<Student> getAllStudents() {
-		return sr.getAllStudents();
+	public List<StudentDTO> getAllStudents() {
+		return sr.getAllStudentsDTOs();
 	}
 
 	@PostMapping("/addStudent")

@@ -11,33 +11,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.rasthrabhasha.dto.SchoolDTO;
 
 @RestController
 public class SchoolController {
-	
-	
+
 	@Autowired
 	SchoolService schoolService;
-	
-	
-	 @PostMapping("/addSchool")
-	    public ResponseEntity<School> addSchool(
-	            @RequestParam Long centreId,
-	            @RequestBody School school) {
 
-	        School savedSchool = schoolService.addSchool(centreId, school);
+	@PostMapping("/addSchool")
+	public ResponseEntity<School> addSchool(
+			@RequestParam Long centreId,
+			@RequestBody School school) {
 
-	        return ResponseEntity
-	                .status(HttpStatus.CREATED)
-	                .body(savedSchool);
-	 }
-	 
-	 
-	 @GetMapping("getAllSchools")
-	 public ResponseEntity<List<School>> getAllSchools(){
-		List <School> list = schoolService.getAllSchools();
-		return ResponseEntity.ok(list);
-		 
-	 }
+		School savedSchool = schoolService.addSchool(centreId, school);
+
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(savedSchool);
+	}
+
+	@GetMapping("getAllSchools")
+	public ResponseEntity<List<SchoolDTO>> getAllSchools() {
+		return ResponseEntity.ok(schoolService.getAllSchoolsDTOs());
+	}
 }

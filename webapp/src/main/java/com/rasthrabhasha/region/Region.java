@@ -3,6 +3,7 @@ package com.rasthrabhasha.region;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rasthrabhasha.examcentre.ExamCentre;
 import jakarta.persistence.*;
@@ -20,7 +21,7 @@ public class Region {
     private String regionName;
 
     @OneToMany(mappedBy = "region")
-    @JsonIgnore
+    @JsonIgnoreProperties("region") 
     private List<ExamCentre> examCentres;
 
     // Default Constructor (CRITICAL for Jackson/Spring)

@@ -14,50 +14,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rasthrabhasha.region.Region;
 
-
+import com.rasthrabhasha.dto.ExamCentreDTO;
 
 @RestController
 public class ExamCentreController {
 
-	 @Autowired
-	    private ExamCentreService examCentreService;
-	 
-	 
+	@Autowired
+	private ExamCentreService examCentreService;
 
-	 @PostMapping("/addExamCentre")
-	 public ResponseEntity<?> addExamCentre(
-	         @RequestParam Long regionId,
-	         @RequestBody Map<String, String> payload) { // Use Map here
-	     // 1. Manually extract the fields from the JSON Map
-		 System.out.println(payload);
-		 System.out.println("This is a region id "+regionId);
-	     String code = payload.get("centreCode");
-	     String name = payload.get("centreName");
-	     // DEBUG: Verify the data in your console
-	     System.out.println("DEBUG: Received Map payload: " + payload);
-	     System.out.println("DEBUG: Extracted -> Code: " + code + ", Name: " + name);
-	     // 2. Create the ExamCentre object manually
-	     ExamCentre examCentre = new ExamCentre();
-	     examCentre.setCentreCode(code);
-	     examCentre.setCentreName(name);
-	     
-	     // 3. Save as usual
-	     ExamCentre savedCentre = examCentreService.addExamCentre(regionId, examCentre);
-	     return ResponseEntity.status(HttpStatus.CREATED).body(savedCentre);
-	 }
-	 
-	 
-	 @GetMapping("/getAllExamCentres")
-	 public ResponseEntity<List<ExamCentre>> getAllExamCentres() {
-		 
-		    List<ExamCentre> examCentres = examCentreService.getAllExams();
-		    
-		    System.out.println(examCentres);
-		    return ResponseEntity.ok(examCentres);
-		}
-		
-	 
-	 
-	
-	
+	@PostMapping("/addExamCentre")
+	public ResponseEntity<?> addExamCentre(
+			@RequestParam Long regionId,
+			@RequestBody Map<String, String> payload) { // Use Map here
+		// 1. Manually extract the fields from the JSON Map
+		System.out.println(payload);
+		System.out.println("This is a region id " + regionId);
+		String code = payload.get("centreCode");
+		String name = payload.get("centreName");
+		// DEBUG: Verify the data in your console
+		System.out.println("DEBUG: Received Map payload: " + payload);
+		System.out.println("DEBUG: Extracted -> Code: " + code + ", Name: " + name);
+		// 2. Create the ExamCentre object manually
+		ExamCentre examCentre = new ExamCentre();
+		examCentre.setCentreCode(code);
+		examCentre.setCentreName(name);
+
+		// 3. Save as usual
+		ExamCentre savedCentre = examCentreService.addExamCentre(regionId, examCentre);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedCentre);
+	}
+
+	@GetMapping("/getAllExamCentres")
+	public ResponseEntity<List<ExamCentreDTO>> getAllExamCentres() {
+		return ResponseEntity.ok(examCentreService.getAllExamCentresDTOs());
+	}
+
 }

@@ -3,6 +3,7 @@ package com.rasthrabhasha.examcentre;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rasthrabhasha.region.Region;
 import com.rasthrabhasha.school.School;
 
@@ -82,7 +83,7 @@ public class ExamCentre {
 	private Region region;
 
 	@OneToMany(mappedBy = "examCentre")
-	@JsonIgnore
+	@JsonIgnoreProperties("examCentre")
 	private List<School> schools;
 
 	// getters & setters

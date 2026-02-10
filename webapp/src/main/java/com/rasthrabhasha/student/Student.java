@@ -18,7 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
-
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Student {
 
 	// Student Entity

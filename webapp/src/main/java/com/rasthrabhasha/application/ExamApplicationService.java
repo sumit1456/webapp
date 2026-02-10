@@ -1,6 +1,9 @@
 package com.rasthrabhasha.application;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import com.rasthrabhasha.dto.ExamApplicationDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,5 +70,28 @@ public class ExamApplicationService {
 
 	}
 
-	
+	public ExamApplicationDTO getApplicationDTO(long applicationId, long examNo) {
+		ExamApplication ea = getFormByApplicationIdAndExamNo(applicationId, examNo);
+		return mapToDTO(ea);
+	}
+
+	public List<ExamApplicationDTO> getAllApplicationsDTOs() {
+		return exam_app_repo.findAll().stream()
+				.map(this::mapToDTO)
+				.collect(Collectors.toList());
+	}
+
+	private ExamApplicationDTO mapToDTO(ExamApplication ea) {
+		ExamApplicationDTO dto = new ExamApplicationDTO();
+		dto.setApplicationId(ea.getApplicationId());
+		dto.setExamNo(ea.getExam() != null ? ea.getExam().getExamNo() : 0);
+		dto.setExamName(ea.getExam() != null ? ea.getExam().getExam_name() : null);
+		dto.setStudentId(ea.getStudent() != null ? ea.getStudent().getStudentId() : 0);
+		dto.setStudentName(
+				ea.getStudent() != null ? ea.getStudent().getFirstName() + " " + ea.getStudent().getLastName() : null);
+		dto.setFormData(ea.getFormData());
+		dto.setStatus(ea.getStatus());
+		return dto;
+	}
+
 }
