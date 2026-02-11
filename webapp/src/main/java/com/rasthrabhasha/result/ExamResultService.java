@@ -3,6 +3,7 @@ package com.rasthrabhasha.result;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.rasthrabhasha.dto.ExamResultDTO;
+import com.rasthrabhasha.exam.Exam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,27 @@ public class ExamResultService {
 	@Autowired
 	ExamResultRepository err;
 
-	public ExamResult createResult(ExamResult er) {
+	public ExamResultDTO createResult(ExamResult er) {
 
 		ExamApplication axamApplication = ear.findByApplicationId(er.getApplication().getApplicationId());
 		if (axamApplication == null)
 			throw new EntityNotFoundException("Invalid Application Id");
 
 		er.setApplication(axamApplication);
-		return err.save(er);
+		ExamResult res = err.save(er);
+		
+		ExamResultDTO dto = new ExamResultDTO();
+		
+		dto.setPercentage(res.getPercentage());
+		dto.setId(res.getId());
+		dto.setPercentage(res.getPercentage());
+		dto.setPublishedAt(res.getPublishedAt());
+		dto.setResultData(res.getResultData());
+		dto.setTotalMarks(res.getTotalMarks());
+	
+		
+		return dto;
+		
 
 	}
 
@@ -56,20 +70,23 @@ public class ExamResultService {
 	}
 
 	private ExamResultDTO mapToDTO(ExamResult er) {
-		ExamResultDTO dto = new ExamResultDTO();
-		dto.setId(er.getId());
-		dto.setApplicationId(er.getApplication() != null ? er.getApplication().getApplicationId() : null);
-		dto.setStudentName(er.getApplication() != null && er.getApplication().getStudent() != null
-				? er.getApplication().getStudent().getFirstName() + " " + er.getApplication().getStudent().getLastName()
-				: null);
-		dto.setExamName(er.getApplication() != null && er.getApplication().getExam() != null
-				? er.getApplication().getExam().getExam_name()
-				: null);
-		dto.setResultData(er.getResultData());
-		dto.setPublishedAt(er.getPublishedAt());
-		dto.setTotalMarks(er.getTotalMarks());
-		dto.setPercentage(er.getPercentage());
-		return dto;
+
+	    ExamResultDTO dto = new ExamResultDTO();
+
+	    dto.setId(er.getId());
+
+	    ExamApplication app = er.getApplication();
+	    Exam exam = (app != null) ? app.getExam() : null;
+
+	    dto.setApplicationId(app != null ? app.getApplicationId() : null);
+	    dto.setExamName(exam != null ? exam.getExam_name() : null);
+
+	    dto.setResultData(er.getResultData());
+	    dto.setPublishedAt(er.getPublishedAt());
+	    dto.setTotalMarks(er.getTotalMarks());
+	    dto.setPercentage(er.getPercentage());
+
+	    return dto;
 	}
 
 }

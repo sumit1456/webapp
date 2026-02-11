@@ -61,11 +61,15 @@ public class StudentService {
 				.collect(Collectors.toList());
 	}
 
-	public Student addStudent(long school_id, Student st) {
+	public StudentDTO addStudent(long school_id, Student st) {
 		School school = school_repo.findById(school_id).orElseThrow(() -> new RuntimeException("School was not found"));
-		st.setSchool(school);
+		
+		Student stu = new Student();
+		
+		StudentDTO dto = new StudentDTO();
+	
 		student_repo.save(st);
-		return st;
+		return dto;
 	}
 
 	public StudentDTO findStudentById(long student_id) {

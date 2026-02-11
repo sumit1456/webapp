@@ -30,19 +30,21 @@ public class StudentController {
 	}
 
 	@PostMapping("/addStudent")
-	public ResponseEntity<Student> addStudent(
+	public ResponseEntity<StudentDTO> addStudent(
 			@RequestParam Long schoolId, // Matches ?schoolId= in frontend
 			@RequestBody Student st) {
 
 		// Debugging logs
 
 		System.out.println("DEBUG: Student Object -> " + st);
+		
+		
 
 		// Save via Service (assuming sr is your service/repository)
-		Student savedStudent = sr.addStudent(schoolId, st);
+		StudentDTO dto = sr.addStudent(0, st);
 
 		// Returns 201 Created with the saved object
-		return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
+		return ResponseEntity.status(HttpStatus.CREATED).body(dto);
 	}
 	
 	
