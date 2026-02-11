@@ -1,6 +1,8 @@
 package com.rasthrabhasha.student;
 
 import java.util.List;
+import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +66,28 @@ public class StudentService {
 		st.setSchool(school);
 		student_repo.save(st);
 		return st;
+	}
+
+	public StudentDTO findStudentById(long student_id) {
+		StudentDTO dto = new StudentDTO();
+		
+		
+		Student student = student_repo.findById(student_id).orElseThrow(() -> new RuntimeException("Student with the id "+student_id+" was not found"));
+		
+		
+		dto.setFirstName(student.getFirstName());
+		dto.setContact(student.getContact());
+		dto.setAge(student.getAge());
+		dto.setEmail(student.getEmail());
+		dto.setStudentId(dto.getStudentId());
+		dto.setMiddleName(student.getMiddleName());
+		
+		dto.setSchoolId(student.getStudentId());
+		
+	    
+	    dto.setExamApplications(student.getApplications());
+		
+		return dto;
 	}
 
 }

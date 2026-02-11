@@ -44,5 +44,13 @@ public class StudentController {
 		// Returns 201 Created with the saved object
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
 	}
+	
+	
+	@GetMapping("getStudentById")
+	public ResponseEntity<StudentDTO> getStudentById(@RequestParam long student_id){
+	    
+		return ResponseEntity.status(HttpStatus.OK).body(sr.findStudentById(student_id));
+		
+	}
 
 }

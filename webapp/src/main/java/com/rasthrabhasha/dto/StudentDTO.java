@@ -1,5 +1,8 @@
 package com.rasthrabhasha.dto;
 
+import java.util.List;
+import com.rasthrabhasha.application.ExamApplication;
+
 public class StudentDTO {
     private long studentId;
     private String firstName;
@@ -11,6 +14,8 @@ public class StudentDTO {
     private String motherTongue;
     private Long schoolId;
     private String schoolName;
+    
+    private List<ExamApplication> examApplications;
 
     public StudentDTO() {
     }
@@ -29,7 +34,15 @@ public class StudentDTO {
         this.schoolName = schoolName;
     }
 
-    public long getStudentId() {
+    public List<ExamApplication> getExamApplications() {
+		return examApplications;
+	}
+
+	public void setExamApplications(List<ExamApplication> examApplications) {
+		this.examApplications = examApplications;
+	}
+
+	public long getStudentId() {
         return studentId;
     }
 

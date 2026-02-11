@@ -21,17 +21,17 @@ public class RegionController {
 
     @PostMapping("/addregion")
     public ResponseEntity<?> addRegion(@RequestBody Map<String, Object> payload) {
-        // 1. Log the RAW map to see what Spring actually received
+       
         System.out.println("RAW PAYLOAD RECEIVED: " + payload);
 
-        // 2. Manually extract the value
+        
         String name = (String) payload.get("regionName");
         System.out.println("EXTRACTED NAME: " + name);
         if (name == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error: regionName is missing in JSON!");
         }
-        // 3. Create and save the Region object manually
+      
         Region region = new Region();
         region.setRegionName(name);
         Region savedRegion = regionService.addRegion(region);

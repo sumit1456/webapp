@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.rasthrabhasha.dto.ExamApplicationDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.rasthrabhasha.exam.Exam;
@@ -25,41 +26,58 @@ public class ExamApplicationService {
 
 	@Autowired
 	ExamApplicationRepository exam_app_repo;
+	
+	
+	public ResponseEntity<ExamApplicationDTO> fillForm(ExamApplication application) {
 
-	public ExamApplication fillForm(ExamApplication application) {
-		if (application.getExam() == null || application.getStudent() == null) {
-			throw new IllegalArgumentException("Exam and Student data must be provided");
-		}
+	    if (application.getExam() == null || application.getStudent() == null) {
+	        throw new IllegalArgumentException("Exam and Student data must be provided");
+	    }
 
-		Exam exam = er.findByExamNo(application.getExam().getExamNo())
-				.orElseThrow(() -> new EntityNotFoundException("Invalid Exam Data"));
+	    Exam exam = er.findByExamNo(application.getExam().getExamNo())
+	            .orElseThrow(() -> new EntityNotFoundException("Invalid Exam Data"));
 
-		Student stu = sr.findByStudentId(application.getStudent().getStudentId())
-				.orElseThrow(() -> new EntityNotFoundException("Invalid Student Data"));
+	    Student stu = sr.findByStudentId(application.getStudent().getStudentId())
+	            .orElseThrow(() -> new EntityNotFoundException("Invalid Student Data"));
 
-		Optional<ExamApplication> existingApp = exam_app_repo.findByStudentAndExam(stu, exam);
-		if (existingApp.isPresent()) {
-			ExamApplication appToUpdate = existingApp.get();
-			if (application.getFormData() != null) {
-				appToUpdate.setFormData(application.getFormData());
-			}
-			if (application.getStatus() != null) {
-				appToUpdate.setStatus(application.getStatus());
-			} else if (appToUpdate.getStatus() == null) {
-				appToUpdate.setStatus("SUBMITTED");
-			}
-			return exam_app_repo.save(appToUpdate);
-		}
+	    ExamApplication savedApp;
 
-		application.setStudent(stu);
-		application.setExam(exam);
-		if (application.getStatus() == null) {
-			application.setStatus("SUBMITTED");
-		}
+	    Optional<ExamApplication> existingApp =
+	            exam_app_repo.findByStudentAndExam(stu, exam);
 
-		return exam_app_repo.save(application);
+	    if (existingApp.isPresent()) {
+	        ExamApplication appToUpdate = existingApp.get();
 
+	        if (application.getFormData() != null) {
+	            appToUpdate.setFormData(application.getFormData());
+	        }
+
+	        if (application.getStatus() != null) {
+	            appToUpdate.setStatus(application.getStatus());
+	        } else if (appToUpdate.getStatus() == null) {
+	            appToUpdate.setStatus("SUBMITTED");
+	        }
+
+	        savedApp = exam_app_repo.save(appToUpdate);
+	    } else {
+	        application.setStudent(stu);
+	        application.setExam(exam);
+
+	        if (application.getStatus() == null) {
+	            application.setStatus("SUBMITTED");
+	        }
+
+	        savedApp = exam_app_repo.save(application);
+	    }
+
+	    ExamApplicationDTO dto = new ExamApplicationDTO();
+	    dto.setApplicationId(savedApp.getApplicationId());
+	    dto.setExamNo(savedApp.getExam().getExamNo());
+	    dto.setStudentId(savedApp.getStudent().getStudentId());
+	    return ResponseEntity.ok(dto);
 	}
+
+
 
 	public ExamApplication getFormByApplicationIdAndExamNo(long applicationId, long examNo) {
 		ExamApplication app = exam_app_repo.findByApplicationIdAndExam_ExamNo(applicationId, examNo);
@@ -89,7 +107,7 @@ public class ExamApplicationService {
 		dto.setStudentId(ea.getStudent() != null ? ea.getStudent().getStudentId() : 0);
 		dto.setStudentName(
 				ea.getStudent() != null ? ea.getStudent().getFirstName() + " " + ea.getStudent().getLastName() : null);
-		dto.setFormData(ea.getFormData());
+		
 		dto.setStatus(ea.getStatus());
 		return dto;
 	}
