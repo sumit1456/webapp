@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import com.rasthrabhasha.result.dto.ExamResultDTO;
 import com.rasthrabhasha.result.dto.ExamResultFilterDTO;
 import com.rasthrabhasha.result.specification.ExamResultSpecification;
+import com.rasthrabhasha.student.Student;
 import com.rasthrabhasha.exam.Exam;
 
 import org.springframework.data.domain.Page;
@@ -77,14 +78,16 @@ public class ExamResultService {
 
 		ExamApplication app = er.getApplication();
 		Exam exam = (app != null) ? app.getExam() : null;
+		Student stu = (app!=null) ? app.getStudent() : null;
 
 		dto.setApplicationId(app != null ? app.getApplicationId() : null);
 		dto.setExamName(exam != null ? exam.getExam_name() : null);
-
 		dto.setResultData(er.getResultData());
 		dto.setPublishedAt(er.getPublishedAt());
 		dto.setTotalMarks(er.getTotalMarks());
 		dto.setPercentage(er.getPercentage());
+		dto.setStudentName(stu.getFirstName()+" "+stu.getMiddleName()+" "+stu.getLastName());
+	
 
 		return dto;
 	}
