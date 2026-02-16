@@ -3,15 +3,14 @@ package com.rasthrabhasha.exam;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ExamRepository extends JpaRepository<Exam, Long> {
+public interface ExamRepository extends JpaRepository<Exam, Long>, JpaSpecificationExecutor<Exam> {
 
 	Optional<Exam> findByExamNo(long examNo);
-	
-//	 void deleteByApplication_Exam_ExamNo(Long examNo);
-	
-	
+
+	// void deleteByApplication_Exam_ExamNo(Long examNo);
 
 }

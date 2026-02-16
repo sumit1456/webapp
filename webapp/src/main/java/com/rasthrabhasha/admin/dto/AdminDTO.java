@@ -1,4 +1,4 @@
-package com.rasthrabhasha.dto;
+package com.rasthrabhasha.admin.dto;
 
 public class AdminDTO {
     private long admin_id;

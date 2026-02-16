@@ -8,8 +8,14 @@ import org.springframework.stereotype.Service;
 import com.rasthrabhasha.examcentre.ExamCentre;
 import com.rasthrabhasha.examcentre.ExamCentreRepository;
 
-import com.rasthrabhasha.dto.SchoolDTO;
+import com.rasthrabhasha.school.dto.SchoolDTO;
+import com.rasthrabhasha.school.dto.SchoolFilterDTO;
+import com.rasthrabhasha.school.specification.SchoolSpecification;
+
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 public class SchoolService {
@@ -20,14 +26,23 @@ public class SchoolService {
 	@Autowired
 	private ExamCentreRepository examCentreRepository;
 
-	public School addSchool(Long centreId, School school) {
+	public SchoolDTO addSchool(Long centreId, School school) {
 
 		ExamCentre examCentre = examCentreRepository.findById(centreId)
 				.orElseThrow(() -> new RuntimeException("Exam Centre not found"));
 
 		school.setExamCentre(examCentre);
 
-		return schoolRepository.save(school);
+		School savedSchool = schoolRepository.save(school);
+		return mapToDTO(savedSchool);
+	}
+
+	private SchoolDTO mapToDTO(School s) {
+		return new SchoolDTO(
+				s.getSchoolId(),
+				s.getSchoolName(),
+				s.getExamCentre() != null ? s.getExamCentre().getCentreId() : null,
+				s.getExamCentre() != null ? s.getExamCentre().getCentreName() : null);
 	}
 
 	public List<School> getAllSchools() {
@@ -38,11 +53,14 @@ public class SchoolService {
 
 	public List<SchoolDTO> getAllSchoolsDTOs() {
 		return schoolRepository.findAll().stream()
-				.map(s -> new SchoolDTO(
-						s.getSchoolId(),
-						s.getSchoolName(),
-						s.getExamCentre() != null ? s.getExamCentre().getCentreId() : null,
-						s.getExamCentre() != null ? s.getExamCentre().getCentreName() : null))
+				.map(this::mapToDTO)
 				.collect(Collectors.toList());
+	}
+
+	public Page<SchoolDTO> searchSchools(SchoolFilterDTO filter, Pageable pageable) {
+		Specification<School> spec = SchoolSpecification.build(filter);
+
+		return schoolRepository.findAll(spec, pageable)
+				.map(this::mapToDTO);
 	}
 }

@@ -2,8 +2,14 @@ package com.rasthrabhasha.result;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import com.rasthrabhasha.dto.ExamResultDTO;
+import com.rasthrabhasha.result.dto.ExamResultDTO;
+import com.rasthrabhasha.result.dto.ExamResultFilterDTO;
+import com.rasthrabhasha.result.specification.ExamResultSpecification;
 import com.rasthrabhasha.exam.Exam;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,19 +35,8 @@ public class ExamResultService {
 
 		er.setApplication(axamApplication);
 		ExamResult res = err.save(er);
-		
-		ExamResultDTO dto = new ExamResultDTO();
-		
-		dto.setPercentage(res.getPercentage());
-		dto.setId(res.getId());
-		dto.setPercentage(res.getPercentage());
-		dto.setPublishedAt(res.getPublishedAt());
-		dto.setResultData(res.getResultData());
-		dto.setTotalMarks(res.getTotalMarks());
-	
-		
-		return dto;
-		
+
+		return mapToDTO(res);
 
 	}
 
@@ -69,24 +64,29 @@ public class ExamResultService {
 				.collect(Collectors.toList());
 	}
 
+	public Page<ExamResultDTO> searchExamResults(ExamResultFilterDTO filter, Pageable pageable) {
+		Specification<ExamResult> spec = ExamResultSpecification.build(filter);
+		return err.findAll(spec, pageable).map(this::mapToDTO);
+	}
+
 	private ExamResultDTO mapToDTO(ExamResult er) {
 
-	    ExamResultDTO dto = new ExamResultDTO();
+		ExamResultDTO dto = new ExamResultDTO();
 
-	    dto.setId(er.getId());
+		dto.setId(er.getId());
 
-	    ExamApplication app = er.getApplication();
-	    Exam exam = (app != null) ? app.getExam() : null;
+		ExamApplication app = er.getApplication();
+		Exam exam = (app != null) ? app.getExam() : null;
 
-	    dto.setApplicationId(app != null ? app.getApplicationId() : null);
-	    dto.setExamName(exam != null ? exam.getExam_name() : null);
+		dto.setApplicationId(app != null ? app.getApplicationId() : null);
+		dto.setExamName(exam != null ? exam.getExam_name() : null);
 
-	    dto.setResultData(er.getResultData());
-	    dto.setPublishedAt(er.getPublishedAt());
-	    dto.setTotalMarks(er.getTotalMarks());
-	    dto.setPercentage(er.getPercentage());
+		dto.setResultData(er.getResultData());
+		dto.setPublishedAt(er.getPublishedAt());
+		dto.setTotalMarks(er.getTotalMarks());
+		dto.setPercentage(er.getPercentage());
 
-	    return dto;
+		return dto;
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.rasthrabhasha.dto;
+package com.rasthrabhasha.school.dto;
 
 public class SchoolDTO {
     private Long schoolId;

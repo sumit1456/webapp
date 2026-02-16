@@ -1,17 +1,20 @@
 package com.rasthrabhasha.exam;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rasthrabhasha.application.ExamApplicationRepository;
-import com.rasthrabhasha.application.ExamApplicationService;
 import com.rasthrabhasha.result.ExamResultRepository;
+import com.rasthrabhasha.exam.dto.ExamDTO;
+import com.rasthrabhasha.exam.dto.ExamFilterDTO;
+import com.rasthrabhasha.exam.specification.ExamSpecification;
 
-import com.rasthrabhasha.dto.ExamDTO;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -30,47 +33,20 @@ public class ExamService {
         return exam_repo.findAll();
     }
 
-    public Exam addExam(Exam exam) {
-        return exam_repo.save(exam);
+    public ExamDTO addExam(Exam exam) {
+        Exam savedExam = exam_repo.save(exam);
+        return mapToDTO(savedExam);
     }
 
     public List<ExamDTO> getAllExamsDTOs() {
         return exam_repo.findAll().stream()
-                .map(e -> {
-                    ExamDTO dto = new ExamDTO();
-                    dto.setExamNo(e.getExamNo());
-                    dto.setExam_name(e.getExam_name());
-                    dto.setNo_of_papers(e.getNo_of_papers());
-                    dto.setExam_fees(e.getExam_fees());
-                    dto.setPapers(e.getPapers());
-                    dto.setExam_details(e.getExam_details());
-                    dto.setExam_code(e.getExam_code());
-                    dto.setApplication_start_date(e.getApplication_start_date());
-                    dto.setApplication_end_date(e.getApplication_end_date());
-                    dto.setExam_start_date(e.getExam_start_date());
-                    dto.setExam_end_date(e.getExam_end_date());
-                    dto.setStatus(e.getStatus());
-                    return dto;
-                })
+                .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     public ExamDTO getExamDTO(long id) {
         Exam e = exam_repo.findById(id).orElseThrow(() -> new RuntimeException("Exam not found"));
-        ExamDTO dto = new ExamDTO();
-        dto.setExamNo(e.getExamNo());
-        dto.setExam_name(e.getExam_name());
-        dto.setNo_of_papers(e.getNo_of_papers());
-        dto.setExam_fees(e.getExam_fees());
-        dto.setPapers(e.getPapers());
-        dto.setExam_details(e.getExam_details());
-        dto.setExam_code(e.getExam_code());
-        dto.setApplication_start_date(e.getApplication_start_date());
-        dto.setApplication_end_date(e.getApplication_end_date());
-        dto.setExam_start_date(e.getExam_start_date());
-        dto.setExam_end_date(e.getExam_end_date());
-        dto.setStatus(e.getStatus());
-        return dto;
+        return mapToDTO(e);
     }
 
     @Transactional
@@ -83,7 +59,7 @@ public class ExamService {
     }
 
     @Transactional
-    public String updateExam(long examNo, Exam updatedExam) {
+    public ExamDTO updateExam(long examNo, Exam updatedExam) {
 
         Exam exam = exam_repo.findById(examNo)
                 .orElseThrow(() -> new RuntimeException("Exam not found with id: " + examNo));
@@ -102,6 +78,29 @@ public class ExamService {
 
         exam.setStatus(updatedExam.getStatus());
 
-        return "Exam has been updated successfully";
+        Exam savedExam = exam_repo.save(exam);
+        return mapToDTO(savedExam);
+    }
+
+    public Page<ExamDTO> searchExams(ExamFilterDTO filter, Pageable pageable) {
+        Specification<Exam> spec = ExamSpecification.build(filter);
+        return exam_repo.findAll(spec, pageable).map(this::mapToDTO);
+    }
+
+    private ExamDTO mapToDTO(Exam e) {
+        ExamDTO dto = new ExamDTO();
+        dto.setExamNo(e.getExamNo());
+        dto.setExam_name(e.getExam_name());
+        dto.setNo_of_papers(e.getNo_of_papers());
+        dto.setExam_fees(e.getExam_fees());
+        dto.setPapers(e.getPapers());
+        dto.setExam_details(e.getExam_details());
+        dto.setExam_code(e.getExam_code());
+        dto.setApplication_start_date(e.getApplication_start_date());
+        dto.setApplication_end_date(e.getApplication_end_date());
+        dto.setExam_start_date(e.getExam_start_date());
+        dto.setExam_end_date(e.getExam_end_date());
+        dto.setStatus(e.getStatus());
+        return dto;
     }
 }

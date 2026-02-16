@@ -1,6 +1,9 @@
 package com.rasthrabhasha.application;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+
 import org.springframework.stereotype.Repository;
 
 import com.rasthrabhasha.exam.Exam;
@@ -8,7 +11,8 @@ import com.rasthrabhasha.student.Student;
 import java.util.Optional;
 
 @Repository
-public interface ExamApplicationRepository extends JpaRepository<ExamApplication, Long> {
+public interface ExamApplicationRepository extends JpaRepository<ExamApplication, Long> ,
+         JpaSpecificationExecutor<ExamApplication>{
 
 	ExamApplication findByApplicationId(long applicationId);
 

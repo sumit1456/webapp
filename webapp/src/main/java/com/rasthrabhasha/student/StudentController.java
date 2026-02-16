@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rasthrabhasha.dto.StudentDTO;
+import com.rasthrabhasha.student.dto.StudentDTO;
+import com.rasthrabhasha.student.dto.StudentFilterDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 public class StudentController {
@@ -33,26 +36,33 @@ public class StudentController {
 	public ResponseEntity<StudentDTO> addStudent(
 			@RequestParam Long schoolId, // Matches ?schoolId= in frontend
 			@RequestBody Student st) {
+		return createStudent(schoolId, st);
+	}
 
-		// Debugging logs
-
-		System.out.println("DEBUG: Student Object -> " + st);
-		
-		
+	@PostMapping("/students")
+	public ResponseEntity<StudentDTO> createStudent(
+			@RequestParam Long schoolId,
+			@RequestBody Student st) {
 
 		// Save via Service (assuming sr is your service/repository)
-		StudentDTO dto = sr.addStudent(0, st);
+		StudentDTO dto = sr.addStudent(schoolId, st);
 
 		// Returns 201 Created with the saved object
 		return ResponseEntity.status(HttpStatus.CREATED).body(dto);
 	}
-	
-	
+
 	@GetMapping("getStudentById")
-	public ResponseEntity<StudentDTO> getStudentById(@RequestParam long student_id){
-	    
+	public ResponseEntity<StudentDTO> getStudentById(@RequestParam long student_id) {
+
 		return ResponseEntity.status(HttpStatus.OK).body(sr.findStudentById(student_id));
-		
+
+	}
+
+	@GetMapping("/students")
+	public Page<StudentDTO> searchStudents(
+			StudentFilterDTO filter,
+			Pageable pageable) {
+		return sr.searchStudents(filter, pageable);
 	}
 
 }

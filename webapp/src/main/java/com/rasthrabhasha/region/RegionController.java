@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rasthrabhasha.dto.RegionDTO;
+import com.rasthrabhasha.region.dto.RegionDTO;
+import com.rasthrabhasha.region.dto.RegionFilterDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 public class RegionController {
@@ -20,29 +23,34 @@ public class RegionController {
     RegionService regionService;
 
     @PostMapping("/addregion")
-    public ResponseEntity<?> addRegion(@RequestBody Map<String, Object> payload) {
-       
-        System.out.println("RAW PAYLOAD RECEIVED: " + payload);
+    public ResponseEntity<RegionDTO> addRegion(@RequestBody Map<String, Object> payload) {
+        return createRegion(payload);
+    }
 
-        
+    @PostMapping("/regions")
+    public ResponseEntity<RegionDTO> createRegion(@RequestBody Map<String, Object> payload) {
+
         String name = (String) payload.get("regionName");
-        System.out.println("EXTRACTED NAME: " + name);
         if (name == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Error: regionName is missing in JSON!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-      
+
         Region region = new Region();
         region.setRegionName(name);
-        Region savedRegion = regionService.addRegion(region);
-        System.out.println("This is a saved Exam Centre entity");
-        System.out.println(savedRegion);
+        RegionDTO savedRegion = regionService.addRegion(region);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRegion);
     }
 
     @GetMapping("/getRegions")
     public ResponseEntity<List<RegionDTO>> getAllRegions() {
         return ResponseEntity.ok(regionService.getAllRegionsDTOs());
+    }
+
+    @GetMapping("/regions")
+    public Page<RegionDTO> searchRegions(
+            RegionFilterDTO filter,
+            Pageable pageable) {
+        return regionService.searchRegions(filter, pageable);
     }
 
 }

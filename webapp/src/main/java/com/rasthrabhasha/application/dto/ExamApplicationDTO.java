@@ -1,4 +1,4 @@
-package com.rasthrabhasha.dto;
+package com.rasthrabhasha.application.dto;
 
 public class ExamApplicationDTO {
     private Long applicationId;
@@ -51,7 +51,6 @@ public class ExamApplicationDTO {
         this.studentName = studentName;
     }
 
-   
     public String getStatus() {
         return status;
     }

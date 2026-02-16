@@ -8,8 +8,14 @@ import org.springframework.stereotype.Service;
 import com.rasthrabhasha.region.Region;
 import com.rasthrabhasha.region.RegionRepository;
 
-import com.rasthrabhasha.dto.ExamCentreDTO;
+import com.rasthrabhasha.examcentre.dto.ExamCentreDTO;
+import com.rasthrabhasha.examcentre.dto.ExamCentreFilterDTO;
+import com.rasthrabhasha.examcentre.specification.ExamCentreSpecification;
+
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 public class ExamCentreService {
@@ -20,22 +26,24 @@ public class ExamCentreService {
 	@Autowired
 	private RegionRepository regionRepository;
 
-	public ExamCentre addExamCentre(Long regionId, ExamCentre examCentre) {
-
-		System.out.println("=========================================================");
+	public ExamCentreDTO addExamCentre(Long regionId, ExamCentre examCentre) {
 
 		Region region = regionRepository.findById(regionId)
 				.orElseThrow(() -> new RuntimeException("Region not found"));
 
 		examCentre.setRegion(region);
 
-		System.out.println("THis is a exan Centre entity");
+		ExamCentre savedCentre = examCentreRepository.save(examCentre);
+		return mapToDTO(savedCentre);
+	}
 
-		System.out.println(examCentre);
-
-		System.out.println("===========================================================");
-
-		return examCentreRepository.save(examCentre);
+	private ExamCentreDTO mapToDTO(ExamCentre ec) {
+		return new ExamCentreDTO(
+				ec.getCentreId(),
+				ec.getCentreCode(),
+				ec.getCentreName(),
+				ec.getRegion() != null ? ec.getRegion().getRegionId() : null,
+				ec.getRegion() != null ? ec.getRegion().getRegionName() : null);
 	}
 
 	public List<ExamCentre> getAllExams() {
@@ -45,13 +53,15 @@ public class ExamCentreService {
 
 	public List<ExamCentreDTO> getAllExamCentresDTOs() {
 		return examCentreRepository.findAll().stream()
-				.map(ec -> new ExamCentreDTO(
-						ec.getCentreId(),
-						ec.getCentreCode(),
-						ec.getCentreName(),
-						ec.getRegion() != null ? ec.getRegion().getRegionId() : null,
-						ec.getRegion() != null ? ec.getRegion().getRegionName() : null))
+				.map(this::mapToDTO)
 				.collect(Collectors.toList());
+	}
+
+	public Page<ExamCentreDTO> searchExamCentres(ExamCentreFilterDTO filter, Pageable pageable) {
+		Specification<ExamCentre> spec = ExamCentreSpecification.build(filter);
+
+		return examCentreRepository.findAll(spec, pageable)
+				.map(this::mapToDTO);
 	}
 
 }

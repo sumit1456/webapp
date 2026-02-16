@@ -1,4 +1,4 @@
-package com.rasthrabhasha.dto;
+package com.rasthrabhasha.examcentre.dto;
 
 public class ExamCentreDTO {
     private Long centreId;

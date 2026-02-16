@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rasthrabhasha.dto.ExamResultDTO;
+import com.rasthrabhasha.result.dto.ExamResultDTO;
+import com.rasthrabhasha.result.dto.ExamResultFilterDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 public class ExamResultController {
@@ -19,8 +22,11 @@ public class ExamResultController {
 
         @PostMapping("/addExamResult")
         public ResponseEntity<ExamResultDTO> addExamResult(@RequestBody ExamResult er) {
-           
-                
+                return createExamResult(er);
+        }
+
+        @PostMapping("/exam-results")
+        public ResponseEntity<ExamResultDTO> createExamResult(@RequestBody ExamResult er) {
                 return ResponseEntity.ok().body(es.createResult(er));
         }
 
@@ -39,6 +45,13 @@ public class ExamResultController {
         @GetMapping("/getStudentResults")
         public List<ExamResultDTO> getStudentResults(@RequestParam long studentId) {
                 return es.getStudentResultsDTOs(studentId);
+        }
+
+        @GetMapping("/exam-results")
+        public Page<ExamResultDTO> searchExamResults(
+                        ExamResultFilterDTO filter,
+                        Pageable pageable) {
+                return es.searchExamResults(filter, pageable);
         }
 
 }

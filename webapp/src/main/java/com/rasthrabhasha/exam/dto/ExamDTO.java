@@ -1,4 +1,4 @@
-package com.rasthrabhasha.dto;
+package com.rasthrabhasha.exam.dto;
 
 import java.time.LocalDate;
 

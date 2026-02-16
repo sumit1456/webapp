@@ -2,7 +2,7 @@ package com.rasthrabhasha.auth;
 
 import org.springframework.stereotype.Service;
 
-import com.rasthrabhasha.dto.LoginRequestDTO;
+import com.rasthrabhasha.auth.dto.LoginRequestDTO;
 
 @Service
 public class AuthService {
@@ -16,7 +16,5 @@ public class AuthService {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	
 
 }

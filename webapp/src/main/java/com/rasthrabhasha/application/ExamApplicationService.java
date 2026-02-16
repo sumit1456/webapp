@@ -3,9 +3,14 @@ package com.rasthrabhasha.application;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import com.rasthrabhasha.dto.ExamApplicationDTO;
+import com.rasthrabhasha.application.dto.ExamApplicationDTO;
+import com.rasthrabhasha.application.dto.ExamApplicationFilterDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import com.rasthrabhasha.application.specification.ExamApplicationSpecification;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -26,58 +31,50 @@ public class ExamApplicationService {
 
 	@Autowired
 	ExamApplicationRepository exam_app_repo;
-	
-	
+
 	public ResponseEntity<ExamApplicationDTO> fillForm(ExamApplication application) {
 
-	    if (application.getExam() == null || application.getStudent() == null) {
-	        throw new IllegalArgumentException("Exam and Student data must be provided");
-	    }
+		if (application.getExam() == null || application.getStudent() == null) {
+			throw new IllegalArgumentException("Exam and Student data must be provided");
+		}
 
-	    Exam exam = er.findByExamNo(application.getExam().getExamNo())
-	            .orElseThrow(() -> new EntityNotFoundException("Invalid Exam Data"));
+		Exam exam = er.findByExamNo(application.getExam().getExamNo())
+				.orElseThrow(() -> new EntityNotFoundException("Invalid Exam Data"));
 
-	    Student stu = sr.findByStudentId(application.getStudent().getStudentId())
-	            .orElseThrow(() -> new EntityNotFoundException("Invalid Student Data"));
+		Student stu = sr.findByStudentId(application.getStudent().getStudentId())
+				.orElseThrow(() -> new EntityNotFoundException("Invalid Student Data"));
 
-	    ExamApplication savedApp;
+		ExamApplication savedApp;
 
-	    Optional<ExamApplication> existingApp =
-	            exam_app_repo.findByStudentAndExam(stu, exam);
+		Optional<ExamApplication> existingApp = exam_app_repo.findByStudentAndExam(stu, exam);
 
-	    if (existingApp.isPresent()) {
-	        ExamApplication appToUpdate = existingApp.get();
+		if (existingApp.isPresent()) {
+			ExamApplication appToUpdate = existingApp.get();
 
-	        if (application.getFormData() != null) {
-	            appToUpdate.setFormData(application.getFormData());
-	        }
+			if (application.getFormData() != null) {
+				appToUpdate.setFormData(application.getFormData());
+			}
 
-	        if (application.getStatus() != null) {
-	            appToUpdate.setStatus(application.getStatus());
-	        } else if (appToUpdate.getStatus() == null) {
-	            appToUpdate.setStatus("SUBMITTED");
-	        }
+			if (application.getStatus() != null) {
+				appToUpdate.setStatus(application.getStatus());
+			} else if (appToUpdate.getStatus() == null) {
+				appToUpdate.setStatus("SUBMITTED");
+			}
 
-	        savedApp = exam_app_repo.save(appToUpdate);
-	    } else {
-	        application.setStudent(stu);
-	        application.setExam(exam);
+			savedApp = exam_app_repo.save(appToUpdate);
+		} else {
+			application.setStudent(stu);
+			application.setExam(exam);
 
-	        if (application.getStatus() == null) {
-	            application.setStatus("SUBMITTED");
-	        }
+			if (application.getStatus() == null) {
+				application.setStatus("SUBMITTED");
+			}
 
-	        savedApp = exam_app_repo.save(application);
-	    }
+			savedApp = exam_app_repo.save(application);
+		}
 
-	    ExamApplicationDTO dto = new ExamApplicationDTO();
-	    dto.setApplicationId(savedApp.getApplicationId());
-	    dto.setExamNo(savedApp.getExam().getExamNo());
-	    dto.setStudentId(savedApp.getStudent().getStudentId());
-	    return ResponseEntity.ok(dto);
+		return ResponseEntity.ok(mapToDTO(savedApp));
 	}
-
-
 
 	public ExamApplication getFormByApplicationIdAndExamNo(long applicationId, long examNo) {
 		ExamApplication app = exam_app_repo.findByApplicationIdAndExam_ExamNo(applicationId, examNo);
@@ -107,9 +104,27 @@ public class ExamApplicationService {
 		dto.setStudentId(ea.getStudent() != null ? ea.getStudent().getStudentId() : 0);
 		dto.setStudentName(
 				ea.getStudent() != null ? ea.getStudent().getFirstName() + " " + ea.getStudent().getLastName() : null);
-		
+
 		dto.setStatus(ea.getStatus());
 		return dto;
+	}
+
+	// a service for dynamic filterning support for getting applications
+	// works with dynamic filters which is present in ExamApplicationFilterDTO
+	// eg region no , school id , exam centre etc
+
+	public Page<ExamApplicationDTO> searchApplications(
+			ExamApplicationFilterDTO filter,
+			Pageable pageable) {
+
+		// Build dynamic specification from filters
+		Specification<ExamApplication> spec = ExamApplicationSpecification.build(filter);
+
+		// Fetch paginated + filtered data from DB
+		Page<ExamApplication> page = exam_app_repo.findAll(spec, pageable);
+
+		// Convert Entity Page → DTO Page
+		return page.map(this::mapToDTO);
 	}
 
 }

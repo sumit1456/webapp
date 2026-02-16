@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rasthrabhasha.region.Region;
-
-import com.rasthrabhasha.dto.ExamCentreDTO;
+import com.rasthrabhasha.examcentre.dto.ExamCentreDTO;
+import com.rasthrabhasha.examcentre.dto.ExamCentreFilterDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 public class ExamCentreController {
@@ -26,27 +27,35 @@ public class ExamCentreController {
 	public ResponseEntity<?> addExamCentre(
 			@RequestParam Long regionId,
 			@RequestBody Map<String, String> payload) { // Use Map here
-		// 1. Manually extract the fields from the JSON Map
-		System.out.println(payload);
-		System.out.println("This is a region id " + regionId);
+		return createExamCentre(regionId, payload);
+	}
+
+	@PostMapping("/exam-centres")
+	public ResponseEntity<ExamCentreDTO> createExamCentre(
+			@RequestParam Long regionId,
+			@RequestBody Map<String, String> payload) {
 		String code = payload.get("centreCode");
 		String name = payload.get("centreName");
-		// DEBUG: Verify the data in your console
-		System.out.println("DEBUG: Received Map payload: " + payload);
-		System.out.println("DEBUG: Extracted -> Code: " + code + ", Name: " + name);
-		// 2. Create the ExamCentre object manually
+
 		ExamCentre examCentre = new ExamCentre();
 		examCentre.setCentreCode(code);
 		examCentre.setCentreName(name);
 
 		// 3. Save as usual
-		ExamCentre savedCentre = examCentreService.addExamCentre(regionId, examCentre);
+		ExamCentreDTO savedCentre = examCentreService.addExamCentre(regionId, examCentre);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedCentre);
 	}
 
 	@GetMapping("/getAllExamCentres")
 	public ResponseEntity<List<ExamCentreDTO>> getAllExamCentres() {
 		return ResponseEntity.ok(examCentreService.getAllExamCentresDTOs());
+	}
+
+	@GetMapping("/exam-centres")
+	public Page<ExamCentreDTO> searchExamCentres(
+			ExamCentreFilterDTO filter,
+			Pageable pageable) {
+		return examCentreService.searchExamCentres(filter, pageable);
 	}
 
 }
