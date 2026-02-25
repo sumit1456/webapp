@@ -107,6 +107,8 @@ public class StudentService {
 	}
 
 	public Page<StudentDTO> searchStudents(StudentFilterDTO filter, Pageable pageable) {
+		
+		
 		Specification<Student> spec = StudentSpecification.build(filter);
 		return student_repo.findAll(spec, pageable)
 				.map(s -> new StudentDTO(

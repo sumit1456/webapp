@@ -5,8 +5,17 @@ public class StudentFilterDTO {
     private String lastName;
     private Long schoolId;
     private String email;
+    private Long studentId;
 
-    // Getters and Setters
+    public Long getStudentId() {
+		return studentId;
+	}
+
+	public void setStudentId(Long studentId) {
+		this.studentId = studentId;
+	}
+
+	// Getters and Setters
     public String getFirstName() {
         return firstName;
     }

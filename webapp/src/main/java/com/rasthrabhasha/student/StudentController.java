@@ -62,6 +62,8 @@ public class StudentController {
 	public Page<StudentDTO> searchStudents(
 			StudentFilterDTO filter,
 			Pageable pageable) {
+		
+		
 		return sr.searchStudents(filter, pageable);
 	}
 
