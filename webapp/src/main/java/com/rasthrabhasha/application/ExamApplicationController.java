@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 import com.rasthrabhasha.application.dto.ExamApplicationDTO;
 import com.rasthrabhasha.application.dto.ExamApplicationFilterDTO;
@@ -46,7 +50,7 @@ public class ExamApplicationController {
     // Endpoint for filterting application records by region, exam centre , school
     // no
     @GetMapping("/exam-applications")
-    public Page<ExamApplicationDTO> searchApplication(
+    public PageResponse<ExamApplicationDTO> searchApplication(
             ExamApplicationFilterDTO filter,
             Pageable pageable) {
 

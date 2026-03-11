@@ -15,6 +15,10 @@ import com.rasthrabhasha.student.dto.StudentDTO;
 import com.rasthrabhasha.student.dto.StudentFilterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 @RestController
 public class StudentController {
@@ -59,12 +63,22 @@ public class StudentController {
 	}
 
 	@GetMapping("/students")
-	public Page<StudentDTO> searchStudents(
+	public PageResponse<StudentDTO> searchStudents(
 			StudentFilterDTO filter,
 			Pageable pageable) {
-		
-		
+
 		return sr.searchStudents(filter, pageable);
+	}
+
+	@PutMapping("/students/{id}")
+	public ResponseEntity<StudentDTO> updateStudent(@PathVariable long id, @RequestBody Student student) {
+		return ResponseEntity.ok(sr.updateStudent(id, student));
+	}
+
+	@DeleteMapping("/students/{id}")
+	public ResponseEntity<Void> deleteStudent(@PathVariable long id) {
+		sr.deleteStudent(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

@@ -3,6 +3,8 @@ package com.rasthrabhasha.school;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.rasthrabhasha.examcentre.ExamCentre;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 @Service
 public class SchoolService {
@@ -26,6 +29,7 @@ public class SchoolService {
 	@Autowired
 	private ExamCentreRepository examCentreRepository;
 
+	@CacheEvict(value = "schools", allEntries = true)
 	public SchoolDTO addSchool(Long centreId, School school) {
 
 		ExamCentre examCentre = examCentreRepository.findById(centreId)
@@ -51,16 +55,20 @@ public class SchoolService {
 		return list;
 	}
 
+	@Cacheable(value = "schools", key = "'allDTOs'")
 	public List<SchoolDTO> getAllSchoolsDTOs() {
 		return schoolRepository.findAll().stream()
 				.map(this::mapToDTO)
 				.collect(Collectors.toList());
 	}
 
-	public Page<SchoolDTO> searchSchools(SchoolFilterDTO filter, Pageable pageable) {
+	@Cacheable(value = "schools", key = "'search:' + #filter.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+	public PageResponse<SchoolDTO> searchSchools(SchoolFilterDTO filter, Pageable pageable) {
+		System.out.println("Request sent to database");
 		Specification<School> spec = SchoolSpecification.build(filter);
 
-		return schoolRepository.findAll(spec, pageable)
+		Page<SchoolDTO> page = schoolRepository.findAll(spec, pageable)
 				.map(this::mapToDTO);
+		return new PageResponse<>(page);
 	}
 }

@@ -1,6 +1,8 @@
 package com.rasthrabhasha.region.dto;
 
-public class RegionDTO {
+import java.io.Serializable;
+
+public class RegionDTO implements Serializable {
     private Long regionId;
     private String regionName;
 

@@ -20,6 +20,8 @@ public interface ExamApplicationRepository extends JpaRepository<ExamApplication
 
 	Optional<ExamApplication> findByStudentAndExam(Student student, Exam exam);
 	
-	 void deleteByExam_ExamNo(long examNo);
+	void deleteByExam_ExamNo(long examNo);
+
+	void deleteByStudent_StudentId(long studentId);
 
 }

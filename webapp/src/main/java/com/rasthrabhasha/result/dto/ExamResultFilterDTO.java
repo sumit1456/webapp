@@ -56,4 +56,22 @@ public class ExamResultFilterDTO {
     public void setMaxPercentage(Double maxPercentage) {
         this.maxPercentage = maxPercentage;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExamResultFilterDTO that = (ExamResultFilterDTO) o;
+        return java.util.Objects.equals(studentId, that.studentId) &&
+               java.util.Objects.equals(examId, that.examId) &&
+               java.util.Objects.equals(schoolId, that.schoolId) &&
+               java.util.Objects.equals(regionId, that.regionId) &&
+               java.util.Objects.equals(minPercentage, that.minPercentage) &&
+               java.util.Objects.equals(maxPercentage, that.maxPercentage);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(studentId, examId, schoolId, regionId, minPercentage, maxPercentage);
+    }
 }

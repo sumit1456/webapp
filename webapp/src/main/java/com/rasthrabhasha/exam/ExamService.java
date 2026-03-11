@@ -12,9 +12,12 @@ import com.rasthrabhasha.exam.dto.ExamFilterDTO;
 import com.rasthrabhasha.exam.specification.ExamSpecification;
 
 import java.util.stream.Collectors;
+import com.rasthrabhasha.common.dto.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -33,22 +36,26 @@ public class ExamService {
         return exam_repo.findAll();
     }
 
+    @CacheEvict(value = "exams", allEntries = true)
     public ExamDTO addExam(Exam exam) {
         Exam savedExam = exam_repo.save(exam);
         return mapToDTO(savedExam);
     }
 
+    @Cacheable(value = "exams", key = "'allDTOs'")
     public List<ExamDTO> getAllExamsDTOs() {
         return exam_repo.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "exams", key = "#id")
     public ExamDTO getExamDTO(long id) {
         Exam e = exam_repo.findById(id).orElseThrow(() -> new RuntimeException("Exam not found"));
         return mapToDTO(e);
     }
 
+    @CacheEvict(value = "exams", allEntries = true)
     @Transactional
     public String deleteExam(long id) {
         exam_res_repo.deleteByApplication_Exam_ExamNo(id);
@@ -58,6 +65,7 @@ public class ExamService {
 
     }
 
+    @CacheEvict(value = "exams", allEntries = true)
     @Transactional
     public ExamDTO updateExam(long examNo, Exam updatedExam) {
 
@@ -82,9 +90,11 @@ public class ExamService {
         return mapToDTO(savedExam);
     }
 
-    public Page<ExamDTO> searchExams(ExamFilterDTO filter, Pageable pageable) {
+    @Cacheable(value = "exams", key = "'search:' + #filter.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+    public PageResponse<ExamDTO> searchExams(ExamFilterDTO filter, Pageable pageable) {
         Specification<Exam> spec = ExamSpecification.build(filter);
-        return exam_repo.findAll(spec, pageable).map(this::mapToDTO);
+        Page<ExamDTO> page = exam_repo.findAll(spec, pageable).map(this::mapToDTO);
+        return new PageResponse<>(page);
     }
 
     private ExamDTO mapToDTO(Exam e) {

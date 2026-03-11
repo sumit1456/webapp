@@ -13,6 +13,7 @@ import com.rasthrabhasha.result.dto.ExamResultDTO;
 import com.rasthrabhasha.result.dto.ExamResultFilterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 @RestController
 public class ExamResultController {
@@ -48,7 +49,7 @@ public class ExamResultController {
         }
 
         @GetMapping("/exam-results")
-        public Page<ExamResultDTO> searchExamResults(
+        public PageResponse<ExamResultDTO> searchExamResults(
                         ExamResultFilterDTO filter,
                         Pageable pageable) {
                 return es.searchExamResults(filter, pageable);

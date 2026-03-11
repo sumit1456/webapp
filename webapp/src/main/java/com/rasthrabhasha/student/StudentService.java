@@ -18,6 +18,13 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import com.rasthrabhasha.common.dto.PageResponse;
+import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import com.rasthrabhasha.exception.EntityNotFoundException;
+import com.rasthrabhasha.application.ExamApplicationRepository;
+import com.rasthrabhasha.result.ExamResultRepository;
 
 @Service
 public class StudentService {
@@ -32,6 +39,7 @@ public class StudentService {
 		return student_repo.findById(id).get();
 	}
 
+	@Cacheable(value = "students", key = "#id")
 	public StudentDTO getStudentDTO(long id) {
 		Student s = student_repo.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
 		return new StudentDTO(
@@ -51,12 +59,14 @@ public class StudentService {
 		return student_repo.findAll();
 	}
 
+	@Cacheable(value = "students", key = "'allDTOs'")
 	public List<StudentDTO> getAllStudentsDTOs() {
 		return student_repo.findAll().stream()
 				.map(this::mapToDTO)
 				.collect(Collectors.toList());
 	}
 
+	@CacheEvict(value = "students", allEntries = true)
 	public StudentDTO addStudent(long school_id, Student st) {
 		School school = school_repo.findById(school_id)
 				.orElseThrow(() -> new RuntimeException("School was not found"));
@@ -79,6 +89,7 @@ public class StudentService {
 				s.getSchool() != null ? s.getSchool().getSchoolName() : null);
 	}
 
+	@Cacheable(value = "students", key = "'details:' + #student_id")
 	public StudentDTO findStudentById(long student_id) {
 		Student student = student_repo.findById(student_id)
 				.orElseThrow(() -> new RuntimeException("Student with the id " + student_id + " was not found"));
@@ -106,22 +117,44 @@ public class StudentService {
 		return dto;
 	}
 
-	public Page<StudentDTO> searchStudents(StudentFilterDTO filter, Pageable pageable) {
-		
-		
+	@Cacheable(value = "students", key = "'search:' + #filter.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+	public PageResponse<StudentDTO> searchStudents(StudentFilterDTO filter, Pageable pageable) {
+        System.out.println("Request sent to database");
 		Specification<Student> spec = StudentSpecification.build(filter);
-		return student_repo.findAll(spec, pageable)
-				.map(s -> new StudentDTO(
-						s.getStudentId(),
-						s.getFirstName(),
-						s.getMiddleName(),
-						s.getLastName(),
-						s.getContact(),
-						s.getEmail(),
-						s.getAge(),
-						s.getMotherTongue(),
-						s.getSchool() != null ? s.getSchool().getSchoolId() : null,
-						s.getSchool() != null ? s.getSchool().getSchoolName() : null));
+		Page<StudentDTO> page = student_repo.findAll(spec, pageable)
+				.map(this::mapToDTO);
+		return new PageResponse<>(page);
+	}
+
+	@CacheEvict(value = "students", allEntries = true)
+	@Transactional
+	public StudentDTO updateStudent(long id, Student updatedStudent) {
+		Student student = student_repo.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + id));
+
+		student.setFirstName(updatedStudent.getFirstName());
+		student.setMiddleName(updatedStudent.getMiddleName());
+		student.setLastName(updatedStudent.getLastName());
+		student.setContact(updatedStudent.getContact());
+		student.setEmail(updatedStudent.getEmail());
+		student.setAge(updatedStudent.getAge());
+		student.setMotherTongue(updatedStudent.getMotherTongue());
+
+		return mapToDTO(student_repo.save(student));
+	}
+
+	@Autowired
+	ExamApplicationRepository examAppRepo;
+
+	@Autowired
+	ExamResultRepository examResultRepo;
+
+	@CacheEvict(value = "students", allEntries = true)
+	@Transactional
+	public void deleteStudent(long id) {
+		examResultRepo.deleteByApplication_Student_StudentId(id);
+		examAppRepo.deleteByStudent_StudentId(id);
+		student_repo.deleteById(id);
 	}
 
 }

@@ -1,0 +1,45 @@
+# Regions
+- POST   /addregion (Legacy)
+- POST   /regions
+- GET    /getRegions (Legacy)
+- GET    /regions (Paginated)
+- PUT    /regions/{id} (New)
+- DELETE /regions/{id} (New)
+
+# Exam Applications
+- POST   /fill-form (Legacy)
+- POST   /exam-applications
+- GET    /get-form (Legacy)
+- GET    /getAllApplications (Legacy)
+- GET    /exam-applications (Paginated)
+- PUT    /exam-applications/{id} (New)
+- DELETE /exam-applications/{id} (New)
+
+# Exams
+- POST   /addExam (Legacy)
+- POST   /exams
+- GET    /getAllExams (Legacy)
+- GET    /getExam (Legacy)
+- DELETE /deleteExam (Legacy)
+- PUT    /updateExam (Legacy)
+- GET    /exams (Paginated)
+- PUT    /exams/{id} (New)
+- DELETE /exams/{id} (New)
+
+# Students
+- GET    /getStudent (Legacy)
+- GET    /getAllStudents (Legacy)
+- POST   /addStudent (Legacy)
+- POST   /students
+- GET    /getStudentById (Legacy)
+- GET    /students (Paginated)
+- PUT    /students/{id} (New)
+- DELETE /students/{id} (New)
+
+# Exam Centres
+- POST   /addExamCentre (Legacy)
+- POST   /exam-centres
+- GET    /getAllExamCentres (Legacy)
+- GET    /exam-centres (Paginated)
+- PUT    /exam-centres/{id} (New)
+- DELETE /exam-centres/{id} (New)

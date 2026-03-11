@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import com.rasthrabhasha.school.dto.SchoolDTO;
 import com.rasthrabhasha.school.dto.SchoolFilterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 @RestController
 public class SchoolController {
@@ -40,6 +42,17 @@ public class SchoolController {
 				.status(HttpStatus.CREATED)
 				.body(savedSchool);
 	}
+	
+	
+	@PutMapping("/schools")
+	public ResponseEntity<SchoolDTO> addSchoolv2(
+			@RequestParam Long centreId,
+			@RequestBody School school) {
+		return createSchool(centreId, school);
+	}
+	
+	
+	
 
 	@GetMapping("getAllSchools")
 	public ResponseEntity<List<SchoolDTO>> getAllSchools() {
@@ -47,7 +60,7 @@ public class SchoolController {
 	}
 
 	@GetMapping("/schools")
-	public Page<SchoolDTO> searchSchools(
+	public PageResponse<SchoolDTO> searchSchools(
 			SchoolFilterDTO filter,
 			Pageable pageable) {
 		return schoolService.searchSchools(filter, pageable);

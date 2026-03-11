@@ -29,4 +29,19 @@ public class ExamCentreFilterDTO {
     public void setCentreCode(String centreCode) {
         this.centreCode = centreCode;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExamCentreFilterDTO that = (ExamCentreFilterDTO) o;
+        return java.util.Objects.equals(centreName, that.centreName) &&
+               java.util.Objects.equals(regionId, that.regionId) &&
+               java.util.Objects.equals(centreCode, that.centreCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(centreName, regionId, centreCode);
+    }
 }

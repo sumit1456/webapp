@@ -11,6 +11,10 @@ import org.springframework.data.domain.Page;
 import com.rasthrabhasha.application.specification.ExamApplicationSpecification;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import jakarta.transaction.Transactional;
+import com.rasthrabhasha.common.dto.PageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +36,7 @@ public class ExamApplicationService {
 	@Autowired
 	ExamApplicationRepository exam_app_repo;
 
+	@CacheEvict(value = "applications", allEntries = true)
 	public ResponseEntity<ExamApplicationDTO> fillForm(ExamApplication application) {
 
 		if (application.getExam() == null || application.getStudent() == null) {
@@ -85,11 +90,13 @@ public class ExamApplicationService {
 
 	}
 
+	@Cacheable(value = "applications", key = "#applicationId + ':' + #examNo")
 	public ExamApplicationDTO getApplicationDTO(long applicationId, long examNo) {
 		ExamApplication ea = getFormByApplicationIdAndExamNo(applicationId, examNo);
 		return mapToDTO(ea);
 	}
 
+	@Cacheable(value = "applications", key = "'allDTOs'")
 	public List<ExamApplicationDTO> getAllApplicationsDTOs() {
 		return exam_app_repo.findAll().stream()
 				.map(this::mapToDTO)
@@ -113,7 +120,8 @@ public class ExamApplicationService {
 	// works with dynamic filters which is present in ExamApplicationFilterDTO
 	// eg region no , school id , exam centre etc
 
-	public Page<ExamApplicationDTO> searchApplications(
+	@Cacheable(value = "applications", key = "'search:' + #filter.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+	public PageResponse<ExamApplicationDTO> searchApplications(
 			ExamApplicationFilterDTO filter,
 			Pageable pageable) {
 
@@ -121,10 +129,37 @@ public class ExamApplicationService {
 		Specification<ExamApplication> spec = ExamApplicationSpecification.build(filter);
 
 		// Fetch paginated + filtered data from DB
-		Page<ExamApplication> page = exam_app_repo.findAll(spec, pageable);
+		Page<ExamApplicationDTO> page = exam_app_repo.findAll(spec, pageable)
+				.map(this::mapToDTO);
 
 		// Convert Entity Page → DTO Page
-		return page.map(this::mapToDTO);
+		return new PageResponse<>(page);
+	}
+
+	@CacheEvict(value = "applications", allEntries = true)
+	@Transactional
+	public ExamApplicationDTO updateApplication(long id, ExamApplication application) {
+		ExamApplication existing = exam_app_repo.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Application not found"));
+
+		if (application.getFormData() != null) {
+			existing.setFormData(application.getFormData());
+		}
+		if (application.getStatus() != null) {
+			existing.setStatus(application.getStatus());
+		}
+
+		return mapToDTO(exam_app_repo.save(existing));
+	}
+
+	@Autowired
+	com.rasthrabhasha.result.ExamResultRepository resultRepo;
+
+	@CacheEvict(value = "applications", allEntries = true)
+	@Transactional
+	public void deleteApplication(long id) {
+		resultRepo.deleteByApplication_ApplicationId(id);
+		exam_app_repo.deleteById(id);
 	}
 
 }

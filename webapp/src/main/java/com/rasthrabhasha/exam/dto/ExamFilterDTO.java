@@ -29,4 +29,19 @@ public class ExamFilterDTO {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExamFilterDTO that = (ExamFilterDTO) o;
+        return java.util.Objects.equals(examName, that.examName) &&
+               java.util.Objects.equals(examCode, that.examCode) &&
+               java.util.Objects.equals(status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(examName, examCode, status);
+    }
 }

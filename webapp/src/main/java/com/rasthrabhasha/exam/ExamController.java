@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rasthrabhasha.exam.dto.ExamDTO;
 import com.rasthrabhasha.exam.dto.ExamFilterDTO;
+import com.rasthrabhasha.common.dto.PageResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.data.domain.Pageable;
 
 @CrossOrigin
@@ -58,10 +60,21 @@ public class ExamController {
 	}
 
 	@GetMapping("/exams")
-	public Page<ExamDTO> searchExams(
+	public PageResponse<ExamDTO> searchExams(
 			ExamFilterDTO filter,
 			Pageable pageable) {
 		return es.searchExams(filter, pageable);
+	}
+
+	@PutMapping("/exams/{id}")
+	public ResponseEntity<ExamDTO> updateExamRest(@PathVariable long id, @RequestBody Exam exam) {
+		return ResponseEntity.ok(es.updateExam(id, exam));
+	}
+
+	@DeleteMapping("/exams/{id}")
+	public ResponseEntity<Void> deleteExamRest(@PathVariable long id) {
+		es.deleteExam(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

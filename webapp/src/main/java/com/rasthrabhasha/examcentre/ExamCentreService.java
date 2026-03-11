@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import com.rasthrabhasha.common.dto.PageResponse;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ExamCentreService {
@@ -26,8 +30,8 @@ public class ExamCentreService {
 	@Autowired
 	private RegionRepository regionRepository;
 
+	@CacheEvict(value = "examCentres", allEntries = true)
 	public ExamCentreDTO addExamCentre(Long regionId, ExamCentre examCentre) {
-
 		Region region = regionRepository.findById(regionId)
 				.orElseThrow(() -> new RuntimeException("Region not found"));
 
@@ -51,17 +55,39 @@ public class ExamCentreService {
 
 	}
 
+	@Cacheable(value = "examCentres", key = "'allDTOs'")
 	public List<ExamCentreDTO> getAllExamCentresDTOs() {
 		return examCentreRepository.findAll().stream()
 				.map(this::mapToDTO)
 				.collect(Collectors.toList());
 	}
 
-	public Page<ExamCentreDTO> searchExamCentres(ExamCentreFilterDTO filter, Pageable pageable) {
+	@Cacheable(value = "examCentres", key = "'search:' + #filter.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+	public PageResponse<ExamCentreDTO> searchExamCentres(ExamCentreFilterDTO filter, Pageable pageable) {
 		Specification<ExamCentre> spec = ExamCentreSpecification.build(filter);
 
-		return examCentreRepository.findAll(spec, pageable)
+		Page<ExamCentreDTO> page = examCentreRepository.findAll(spec, pageable)
 				.map(this::mapToDTO);
+
+		return new PageResponse<>(page);
+	}
+
+	@CacheEvict(value = "examCentres", allEntries = true)
+	@Transactional
+	public ExamCentreDTO updateExamCentre(long id, ExamCentre updatedCentre) {
+		ExamCentre ec = examCentreRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Exam Centre not found"));
+
+		ec.setCentreCode(updatedCentre.getCentreCode());
+		ec.setCentreName(updatedCentre.getCentreName());
+
+		return mapToDTO(examCentreRepository.save(ec));
+	}
+
+	@CacheEvict(value = "examCentres", allEntries = true)
+	@Transactional
+	public void deleteExamCentre(long id) {
+		examCentreRepository.deleteById(id);
 	}
 
 }

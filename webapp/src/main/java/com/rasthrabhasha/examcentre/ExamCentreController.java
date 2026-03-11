@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rasthrabhasha.examcentre.dto.ExamCentreDTO;
 import com.rasthrabhasha.examcentre.dto.ExamCentreFilterDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 @RestController
 public class ExamCentreController {
@@ -52,10 +55,21 @@ public class ExamCentreController {
 	}
 
 	@GetMapping("/exam-centres")
-	public Page<ExamCentreDTO> searchExamCentres(
+	public PageResponse<ExamCentreDTO> searchExamCentres(
 			ExamCentreFilterDTO filter,
 			Pageable pageable) {
 		return examCentreService.searchExamCentres(filter, pageable);
+	}
+
+	@PutMapping("/exam-centres/{id}")
+	public ResponseEntity<ExamCentreDTO> updateExamCentre(@PathVariable long id, @RequestBody ExamCentre examCentre) {
+		return ResponseEntity.ok(examCentreService.updateExamCentre(id, examCentre));
+	}
+
+	@DeleteMapping("/exam-centres/{id}")
+	public ResponseEntity<Void> deleteExamCentre(@PathVariable long id) {
+		examCentreService.deleteExamCentre(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

@@ -2,6 +2,8 @@ package com.rasthrabhasha.result;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import com.rasthrabhasha.result.dto.ExamResultDTO;
 import com.rasthrabhasha.result.dto.ExamResultFilterDTO;
 import com.rasthrabhasha.result.specification.ExamResultSpecification;
@@ -11,6 +13,7 @@ import com.rasthrabhasha.exam.Exam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import com.rasthrabhasha.common.dto.PageResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class ExamResultService {
 	@Autowired
 	ExamResultRepository err;
 
+	@CacheEvict(value = "results", allEntries = true)
 	public ExamResultDTO createResult(ExamResult er) {
 
 		ExamApplication axamApplication = ear.findByApplicationId(er.getApplication().getApplicationId());
@@ -53,21 +57,26 @@ public class ExamResultService {
 		return mapToDTO(er);
 	}
 
+	@Cacheable(value = "results", key = "'allDTOs'")
 	public List<ExamResultDTO> getAllResultsDTOs() {
 		return err.findAll().stream()
 				.map(this::mapToDTO)
 				.collect(Collectors.toList());
 	}
 
+	@Cacheable(value = "results", key = "'student:' + #studentId")
 	public List<ExamResultDTO> getStudentResultsDTOs(long studentId) {
 		return err.findByStudentId(studentId).stream()
 				.map(this::mapToDTO)
 				.collect(Collectors.toList());
 	}
 
-	public Page<ExamResultDTO> searchExamResults(ExamResultFilterDTO filter, Pageable pageable) {
+	@Cacheable(value = "results", key = "'search:' + #filter.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
+	public PageResponse<ExamResultDTO> searchExamResults(ExamResultFilterDTO filter, Pageable pageable) {
+		System.out.println("Request sent to database");
 		Specification<ExamResult> spec = ExamResultSpecification.build(filter);
-		return err.findAll(spec, pageable).map(this::mapToDTO);
+		Page<ExamResultDTO> page = err.findAll(spec, pageable).map(this::mapToDTO);
+		return new PageResponse<>(page);
 	}
 
 	private ExamResultDTO mapToDTO(ExamResult er) {
