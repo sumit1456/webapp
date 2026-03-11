@@ -3,6 +3,7 @@ package com.rasthrabhasha.student.dto;
 import java.util.List;
 import com.rasthrabhasha.application.dto.ExamApplicationDTO;
 
+//Student entity
 public class StudentDTO {
     private long studentId;
     private String firstName;
