@@ -19,7 +19,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "exam_centre")
+@Table(name = "exam_centre", indexes = {
+		@jakarta.persistence.Index(name = "idx_exam_centre_region_id", columnList = "region_id")
+})
 public class ExamCentre {
 
 	@Override

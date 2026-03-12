@@ -19,7 +19,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "school")
+@Table(name = "school", indexes = {
+		@jakarta.persistence.Index(name = "idx_school_centre_id", columnList = "centre_id")
+})
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class School {
 
