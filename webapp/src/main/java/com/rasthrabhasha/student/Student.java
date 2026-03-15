@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -54,9 +55,16 @@ public class Student {
 	@Column
 	private String motherTongue;
 
+	@Column(name = "has_profile", columnDefinition = "boolean default false")
+	private Boolean hasProfile = false;
+
 	@OneToMany(mappedBy = "student")
 	@JsonIgnore
 	private List<ExamApplication> applications;
+
+	@OneToOne(mappedBy = "student", cascade = jakarta.persistence.CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnoreProperties("student")
+	private StudentProfile profile;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "school_id", nullable = false)
@@ -153,5 +161,21 @@ public class Student {
 
 	public void setMotherTongue(String motherTongue) {
 		this.motherTongue = motherTongue;
+	}
+
+	public StudentProfile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(StudentProfile profile) {
+		this.profile = profile;
+	}
+	
+	public Boolean getHasProfile() {
+		return hasProfile;
+	}
+
+	public void setHasProfile(Boolean hasProfile) {
+		this.hasProfile = hasProfile;
 	}
 }

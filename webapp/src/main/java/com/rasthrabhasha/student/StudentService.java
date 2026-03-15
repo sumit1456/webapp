@@ -52,7 +52,8 @@ public class StudentService {
 				s.getAge(),
 				s.getMotherTongue(),
 				s.getSchool() != null ? s.getSchool().getSchoolId() : null,
-				s.getSchool() != null ? s.getSchool().getSchoolName() : null);
+				s.getSchool() != null ? s.getSchool().getSchoolName() : null,
+				s.getHasProfile());
 	}
 
 	public List<Student> getAllStudents() {
@@ -86,7 +87,8 @@ public class StudentService {
 				s.getAge(),
 				s.getMotherTongue(),
 				s.getSchool() != null ? s.getSchool().getSchoolId() : null,
-				s.getSchool() != null ? s.getSchool().getSchoolName() : null);
+				s.getSchool() != null ? s.getSchool().getSchoolName() : null,
+				s.getHasProfile());
 	}
 
 	@Cacheable(value = "students", key = "'details:' + #student_id")
@@ -139,6 +141,9 @@ public class StudentService {
 		student.setEmail(updatedStudent.getEmail());
 		student.setAge(updatedStudent.getAge());
 		student.setMotherTongue(updatedStudent.getMotherTongue());
+		if (updatedStudent.getHasProfile() != null) {
+			student.setHasProfile(updatedStudent.getHasProfile());
+		}
 
 		return mapToDTO(student_repo.save(student));
 	}

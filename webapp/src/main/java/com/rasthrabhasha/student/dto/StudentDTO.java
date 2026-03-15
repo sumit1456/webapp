@@ -15,6 +15,7 @@ public class StudentDTO {
     private String motherTongue;
     private Long schoolId;
     private String schoolName;
+    private Boolean hasProfile;
 
     private List<ExamApplicationDTO> examApplications;
 
@@ -22,7 +23,7 @@ public class StudentDTO {
     }
 
     public StudentDTO(long studentId, String firstName, String middleName, String lastName, String contact,
-            String email, Integer age, String motherTongue, Long schoolId, String schoolName) {
+            String email, Integer age, String motherTongue, Long schoolId, String schoolName, Boolean hasProfile) {
         this.studentId = studentId;
         this.firstName = firstName;
         this.middleName = middleName;
@@ -33,6 +34,7 @@ public class StudentDTO {
         this.motherTongue = motherTongue;
         this.schoolId = schoolId;
         this.schoolName = schoolName;
+        this.hasProfile = hasProfile;
     }
 
     public List<ExamApplicationDTO> getExamApplications() {
@@ -121,5 +123,13 @@ public class StudentDTO {
 
     public void setSchoolName(String schoolName) {
         this.schoolName = schoolName;
+    }
+
+    public Boolean getHasProfile() {
+        return hasProfile;
+    }
+
+    public void setHasProfile(Boolean hasProfile) {
+        this.hasProfile = hasProfile;
     }
 }
