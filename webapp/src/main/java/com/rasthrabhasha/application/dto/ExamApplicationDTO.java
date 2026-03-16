@@ -7,6 +7,7 @@ public class ExamApplicationDTO {
     private long studentId;
     private String studentName;
     private String status;
+    private String formData;
 
     public ExamApplicationDTO() {
     }
@@ -57,5 +58,13 @@ public class ExamApplicationDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getFormData() {
+        return formData;
+    }
+
+    public void setFormData(String formData) {
+        this.formData = formData;
     }
 }

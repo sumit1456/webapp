@@ -37,16 +37,16 @@ public class ExamApplicationService {
 	ExamApplicationRepository exam_app_repo;
 
 	@CacheEvict(value = "applications", allEntries = true)
-	public ResponseEntity<ExamApplicationDTO> fillForm(ExamApplication application) {
+	public ResponseEntity<ExamApplicationDTO> fillForm(ExamApplicationDTO dto) {
 
-		if (application.getExam() == null || application.getStudent() == null) {
+		if (dto.getExamNo() == 0 || dto.getStudentId() == 0) {
 			throw new IllegalArgumentException("Exam and Student data must be provided");
 		}
 
-		Exam exam = er.findByExamNo(application.getExam().getExamNo())
+		Exam exam = er.findByExamNo(dto.getExamNo())
 				.orElseThrow(() -> new EntityNotFoundException("Invalid Exam Data"));
 
-		Student stu = sr.findByStudentId(application.getStudent().getStudentId())
+		Student stu = sr.findByStudentId(dto.getStudentId())
 				.orElseThrow(() -> new EntityNotFoundException("Invalid Student Data"));
 
 		ExamApplication savedApp;
@@ -56,22 +56,26 @@ public class ExamApplicationService {
 		if (existingApp.isPresent()) {
 			ExamApplication appToUpdate = existingApp.get();
 
-			if (application.getFormData() != null) {
-				appToUpdate.setFormData(application.getFormData());
+			if (dto.getFormData() != null) {
+				appToUpdate.setFormData(dto.getFormData());
 			}
 
-			if (application.getStatus() != null) {
-				appToUpdate.setStatus(application.getStatus());
+			if (dto.getStatus() != null) {
+				appToUpdate.setStatus(dto.getStatus());
 			} else if (appToUpdate.getStatus() == null) {
 				appToUpdate.setStatus("SUBMITTED");
 			}
 
 			savedApp = exam_app_repo.save(appToUpdate);
 		} else {
+			ExamApplication application = new ExamApplication();
 			application.setStudent(stu);
 			application.setExam(exam);
+			application.setFormData(dto.getFormData());
 
-			if (application.getStatus() == null) {
+			if (dto.getStatus() != null) {
+				application.setStatus(dto.getStatus());
+			} else {
 				application.setStatus("SUBMITTED");
 			}
 
@@ -111,8 +115,8 @@ public class ExamApplicationService {
 		dto.setStudentId(ea.getStudent() != null ? ea.getStudent().getStudentId() : 0);
 		dto.setStudentName(
 				ea.getStudent() != null ? ea.getStudent().getFirstName() + " " + ea.getStudent().getLastName() : null);
-
 		dto.setStatus(ea.getStatus());
+		dto.setFormData(ea.getFormData());
 		return dto;
 	}
 
@@ -138,15 +142,15 @@ public class ExamApplicationService {
 
 	@CacheEvict(value = "applications", allEntries = true)
 	@Transactional
-	public ExamApplicationDTO updateApplication(long id, ExamApplication application) {
+	public ExamApplicationDTO updateApplication(long id, ExamApplicationDTO dto) {
 		ExamApplication existing = exam_app_repo.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Application not found"));
 
-		if (application.getFormData() != null) {
-			existing.setFormData(application.getFormData());
+		if (dto.getFormData() != null) {
+			existing.setFormData(dto.getFormData());
 		}
-		if (application.getStatus() != null) {
-			existing.setStatus(application.getStatus());
+		if (dto.getStatus() != null) {
+			existing.setStatus(dto.getStatus());
 		}
 
 		return mapToDTO(exam_app_repo.save(existing));

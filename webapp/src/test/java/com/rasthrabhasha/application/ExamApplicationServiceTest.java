@@ -60,67 +60,97 @@ class ExamApplicationServiceTest {
         application.setStudent(student);
         application.setExam(exam);
         application.setStatus("SUBMITTED");
+        application.setFormData("{\"paper\":\"Hindi\"}");
+    }
+
+    private ExamApplicationDTO buildDTO(long examNo, long studentId, String status, String formData) {
+        ExamApplicationDTO dto = new ExamApplicationDTO();
+        dto.setExamNo(examNo);
+        dto.setStudentId(studentId);
+        dto.setStatus(status);
+        dto.setFormData(formData);
+        return dto;
     }
 
     @Test
     void fillForm_newApplication_savesAndReturnsDTO() {
-        ExamApplication request = new ExamApplication();
-        request.setStudent(student);
-        request.setExam(exam);
+        ExamApplicationDTO dto = buildDTO(10L, 1L, null, "{\"paper\":\"Hindi\"}");
 
-        when(er.findByExamNo(exam.getExamNo())).thenReturn(Optional.of(exam));
-        when(sr.findByStudentId(student.getStudentId())).thenReturn(Optional.of(student));
+        when(er.findByExamNo(10L)).thenReturn(Optional.of(exam));
+        when(sr.findByStudentId(1L)).thenReturn(Optional.of(student));
         when(exam_app_repo.findByStudentAndExam(student, exam)).thenReturn(Optional.empty());
         when(exam_app_repo.save(any(ExamApplication.class))).thenReturn(application);
 
-        ResponseEntity<ExamApplicationDTO> response = examApplicationService.fillForm(request);
+        ResponseEntity<ExamApplicationDTO> response = examApplicationService.fillForm(dto);
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals("SUBMITTED", response.getBody().getStatus());
+        assertEquals("{\"paper\":\"Hindi\"}", response.getBody().getFormData());
         verify(exam_app_repo).save(any(ExamApplication.class));
     }
 
     @Test
-    void fillForm_whenExamNull_throwsIllegalArgumentException() {
-        ExamApplication badRequest = new ExamApplication();
-        badRequest.setStudent(student);
-        // exam = null
+    void fillForm_newApplication_formDataIsNull_savesWithNullFormData() {
+        ExamApplicationDTO dto = buildDTO(10L, 1L, null, null);
 
+        ExamApplication savedApp = new ExamApplication();
+        savedApp.setApplicationId(101L);
+        savedApp.setStudent(student);
+        savedApp.setExam(exam);
+        savedApp.setStatus("SUBMITTED");
+        savedApp.setFormData(null);
+
+        when(er.findByExamNo(10L)).thenReturn(Optional.of(exam));
+        when(sr.findByStudentId(1L)).thenReturn(Optional.of(student));
+        when(exam_app_repo.findByStudentAndExam(student, exam)).thenReturn(Optional.empty());
+        when(exam_app_repo.save(any(ExamApplication.class))).thenReturn(savedApp);
+
+        ResponseEntity<ExamApplicationDTO> response = examApplicationService.fillForm(dto);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertNull(response.getBody().getFormData());
+    }
+
+    @Test
+    void fillForm_whenExamNoZero_throwsIllegalArgumentException() {
+        ExamApplicationDTO dto = buildDTO(0L, 1L, null, null);
         assertThrows(IllegalArgumentException.class,
-                () -> examApplicationService.fillForm(badRequest));
+                () -> examApplicationService.fillForm(dto));
+    }
+
+    @Test
+    void fillForm_whenStudentIdZero_throwsIllegalArgumentException() {
+        ExamApplicationDTO dto = buildDTO(10L, 0L, null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> examApplicationService.fillForm(dto));
     }
 
     @Test
     void fillForm_whenExamNotFound_throwsEntityNotFoundException() {
-        ExamApplication request = new ExamApplication();
-        request.setStudent(student);
-        request.setExam(exam);
-
-        when(er.findByExamNo(exam.getExamNo())).thenReturn(Optional.empty());
+        ExamApplicationDTO dto = buildDTO(10L, 1L, null, null);
+        when(er.findByExamNo(10L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> examApplicationService.fillForm(request));
+                () -> examApplicationService.fillForm(dto));
     }
 
     @Test
-    void fillForm_existingApplication_updatesAndSaves() {
-        ExamApplication request = new ExamApplication();
-        request.setStudent(student);
-        request.setExam(exam);
-        request.setStatus("APPROVED");
+    void fillForm_existingApplication_updatesFormDataAndStatus() {
+        ExamApplicationDTO dto = buildDTO(10L, 1L, "APPROVED", "{\"paper\":\"Hindi Updated\"}");
 
         ExamApplication existing = new ExamApplication();
         existing.setApplicationId(200L);
         existing.setStudent(student);
         existing.setExam(exam);
         existing.setStatus("SUBMITTED");
+        existing.setFormData("{\"paper\":\"Hindi\"}");
 
-        when(er.findByExamNo(exam.getExamNo())).thenReturn(Optional.of(exam));
-        when(sr.findByStudentId(student.getStudentId())).thenReturn(Optional.of(student));
+        when(er.findByExamNo(10L)).thenReturn(Optional.of(exam));
+        when(sr.findByStudentId(1L)).thenReturn(Optional.of(student));
         when(exam_app_repo.findByStudentAndExam(student, exam)).thenReturn(Optional.of(existing));
         when(exam_app_repo.save(any(ExamApplication.class))).thenReturn(existing);
 
-        ResponseEntity<ExamApplicationDTO> response = examApplicationService.fillForm(request);
+        ResponseEntity<ExamApplicationDTO> response = examApplicationService.fillForm(dto);
 
         assertEquals(200, response.getStatusCode().value());
         verify(exam_app_repo).save(existing);
@@ -134,6 +164,7 @@ class ExamApplicationServiceTest {
 
         assertEquals(1, dtos.size());
         assertEquals("SUBMITTED", dtos.get(0).getStatus());
+        assertEquals("{\"paper\":\"Hindi\"}", dtos.get(0).getFormData());
     }
 
     @Test
@@ -152,5 +183,35 @@ class ExamApplicationServiceTest {
         when(exam_app_repo.findByApplicationIdAndExam_ExamNo(999L, 10L)).thenReturn(null);
         assertThrows(EntityNotFoundException.class,
                 () -> examApplicationService.getFormByApplicationIdAndExamNo(999L, 10L));
+    }
+
+    @Test
+    void updateApplication_updatesFormDataAndStatus() {
+        ExamApplicationDTO dto = buildDTO(0, 0, "APPROVED", "{\"updated\":true}");
+
+        ExamApplication existing = new ExamApplication();
+        existing.setApplicationId(100L);
+        existing.setStudent(student);
+        existing.setExam(exam);
+        existing.setStatus("SUBMITTED");
+        existing.setFormData("{\"paper\":\"Hindi\"}");
+
+        when(exam_app_repo.findById(100L)).thenReturn(Optional.of(existing));
+        when(exam_app_repo.save(any(ExamApplication.class))).thenReturn(existing);
+
+        ExamApplicationDTO result = examApplicationService.updateApplication(100L, dto);
+
+        assertEquals("APPROVED", existing.getStatus());
+        assertEquals("{\"updated\":true}", existing.getFormData());
+        verify(exam_app_repo).save(existing);
+    }
+
+    @Test
+    void updateApplication_whenNotFound_throwsEntityNotFoundException() {
+        when(exam_app_repo.findById(999L)).thenReturn(Optional.empty());
+        ExamApplicationDTO dto = buildDTO(0, 0, "APPROVED", null);
+
+        assertThrows(EntityNotFoundException.class,
+                () -> examApplicationService.updateApplication(999L, dto));
     }
 }
