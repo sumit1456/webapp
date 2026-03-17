@@ -70,4 +70,17 @@ public class ExamApplicationController {
         return ResponseEntity.noContent().build();
     }
 
+    // Generate hall ticket details (rollNo, centreId, flag)
+    @PostMapping("/exam-applications/{id}/generate-hall-ticket")
+    public ExamApplicationDTO generateHallTicket(@PathVariable Long id) {
+        return eas.generateHallTicket(id);
+    }
+
+    // Batch generate hall tickets for all APPROVED applications
+    @PostMapping("/exam-applications/batch-generate-hall-tickets")
+    public ResponseEntity<String> batchGenerateHallTickets() {
+        eas.batchGenerateHallTickets();
+        return ResponseEntity.ok("Batch hall ticket generation process completed.");
+    }
+
 }

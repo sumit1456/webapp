@@ -8,6 +8,9 @@ public class ExamApplicationDTO {
     private String studentName;
     private String status;
     private String formData;
+    private String rollNo;
+    private Long centreId;
+    private Boolean isHallTicketGenerated;
 
     public ExamApplicationDTO() {
     }
@@ -66,5 +69,29 @@ public class ExamApplicationDTO {
 
     public void setFormData(String formData) {
         this.formData = formData;
+    }
+
+    public String getRollNo() {
+        return rollNo;
+    }
+
+    public void setRollNo(String rollNo) {
+        this.rollNo = rollNo;
+    }
+
+    public Long getCentreId() {
+        return centreId;
+    }
+
+    public void setCentreId(Long centreId) {
+        this.centreId = centreId;
+    }
+
+    public Boolean getIsHallTicketGenerated() {
+        return isHallTicketGenerated;
+    }
+
+    public void setIsHallTicketGenerated(Boolean isHallTicketGenerated) {
+        this.isHallTicketGenerated = isHallTicketGenerated;
     }
 }

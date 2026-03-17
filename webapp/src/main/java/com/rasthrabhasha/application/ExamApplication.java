@@ -22,6 +22,13 @@ public class ExamApplication {
     @ManyToOne
     @JoinColumn(name = "exam_no")
     private Exam exam;
+
+    private String rollNo;
+
+    private Long centreId;
+
+    @Column(name = "is_hall_ticket_generated", columnDefinition = "boolean default false")
+    private Boolean isHallTicketGenerated = false;
     
     
     public Long getApplicationId() {
@@ -62,6 +69,30 @@ public class ExamApplication {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getRollNo() {
+		return rollNo;
+	}
+
+	public void setRollNo(String rollNo) {
+		this.rollNo = rollNo;
+	}
+
+	public Long getCentreId() {
+		return centreId;
+	}
+
+	public void setCentreId(Long centreId) {
+		this.centreId = centreId;
+	}
+
+	public Boolean getIsHallTicketGenerated() {
+		return isHallTicketGenerated;
+	}
+
+	public void setIsHallTicketGenerated(Boolean isHallTicketGenerated) {
+		this.isHallTicketGenerated = isHallTicketGenerated;
 	}
 
 	@ManyToOne

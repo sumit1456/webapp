@@ -117,7 +117,66 @@ public class ExamApplicationService {
 				ea.getStudent() != null ? ea.getStudent().getFirstName() + " " + ea.getStudent().getLastName() : null);
 		dto.setStatus(ea.getStatus());
 		dto.setFormData(ea.getFormData());
+		dto.setRollNo(ea.getRollNo());
+		dto.setCentreId(ea.getCentreId());
+		dto.setIsHallTicketGenerated(ea.getIsHallTicketGenerated());
 		return dto;
+	}
+
+	@Transactional
+	@CacheEvict(value = "applications", allEntries = true)
+	public ExamApplicationDTO generateHallTicket(Long applicationId) {
+		ExamApplication app = exam_app_repo.findById(applicationId)
+				.orElseThrow(() -> new EntityNotFoundException("Application not found"));
+
+		processHallTicketGeneration(app);
+
+		return mapToDTO(exam_app_repo.save(app));
+	}
+
+	private void processHallTicketGeneration(ExamApplication app) {
+		if (!"APPROVED".equals(app.getStatus())) {
+			throw new IllegalStateException("Hall ticket can only be generated for APPROVED applications");
+		}
+
+		Student student = app.getStudent();
+		if (student == null || student.getSchool() == null || student.getSchool().getExamCentre() == null) {
+			throw new IllegalStateException("Student, School or Exam Centre information is missing for this application");
+		}
+
+		com.rasthrabhasha.school.School school = student.getSchool();
+		com.rasthrabhasha.examcentre.ExamCentre centre = school.getExamCentre();
+		com.rasthrabhasha.region.Region region = centre.getRegion();
+
+		if (region == null) {
+			throw new IllegalStateException("Region information is missing for the Exam Centre");
+		}
+
+		Long regionId = region.getRegionId();
+		Long centreId = centre.getCentreId();
+		Long schoolId = school.getSchoolId();
+
+		// Generate roll no: {regionId}{centreId}{schoolId}{applicationId}
+		String rollNo = String.format("%d%d%d%d", regionId, centreId, schoolId, app.getApplicationId());
+
+		app.setRollNo(rollNo);
+		app.setCentreId(centreId);
+		app.setIsHallTicketGenerated(true);
+	}
+
+	@Transactional
+	@CacheEvict(value = "applications", allEntries = true)
+	public void batchGenerateHallTickets() {
+		List<ExamApplication> apps = exam_app_repo.findByStatusAndIsHallTicketGenerated("APPROVED", false);
+		for (ExamApplication app : apps) {
+			try {
+				processHallTicketGeneration(app);
+				exam_app_repo.save(app);
+			} catch (Exception e) {
+				// Log error for specific application but continue batch
+				System.err.println("Failed to generate hall ticket for application ID: " + app.getApplicationId() + ". Error: " + e.getMessage());
+			}
+		}
 	}
 
 	// a service for dynamic filterning support for getting applications

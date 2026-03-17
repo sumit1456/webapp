@@ -24,4 +24,8 @@ public interface ExamApplicationRepository extends JpaRepository<ExamApplication
 
 	void deleteByStudent_StudentId(long studentId);
 
+	java.util.List<ExamApplication> findByStatus(String status);
+
+	java.util.List<ExamApplication> findByStatusAndIsHallTicketGenerated(String status, Boolean isHallTicketGenerated);
+
 }
