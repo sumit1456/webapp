@@ -86,6 +86,10 @@ public class ExamService {
 
         exam.setStatus(updatedExam.getStatus());
 
+        exam.setControllerSignatureUrl(updatedExam.getControllerSignatureUrl());
+        exam.setBoardSealUrl(updatedExam.getBoardSealUrl());
+        exam.setBoardLogoUrl(updatedExam.getBoardLogoUrl());
+
         Exam savedExam = exam_repo.save(exam);
         return mapToDTO(savedExam);
     }
@@ -111,6 +115,9 @@ public class ExamService {
         dto.setExam_start_date(e.getExam_start_date());
         dto.setExam_end_date(e.getExam_end_date());
         dto.setStatus(e.getStatus());
+        dto.setControllerSignatureUrl(e.getControllerSignatureUrl());
+        dto.setBoardSealUrl(e.getBoardSealUrl());
+        dto.setBoardLogoUrl(e.getBoardLogoUrl());
         return dto;
     }
 }

@@ -29,17 +29,17 @@ public class Exam {
     private double exam_fees;
 
     @Column(columnDefinition = "json")
-    private String papers; 
+    private String papers;
     // [{"code":"P1","name":"Paper I","maxMarks":100}, ...]
 
     @Column(columnDefinition = "json")
-    private String exam_details; 
+    private String exam_details;
     // exam-specific descriptive details
 
     // ===== NEW FIELDS (ADDED) =====
 
     @Column(unique = true, nullable = false)
-    private String exam_code; 
+    private String exam_code;
     // PRAVIN_HINDI, PRABODH_HINDI
 
     private LocalDate application_start_date;
@@ -51,6 +51,15 @@ public class Exam {
     // ✅ STATUS AS STRING
     private String status;
     // DRAFT / PUBLISHED / CLOSED / RESULT_PUBLISHED
+
+    @Column(name = "controller_signature_url", columnDefinition = "TEXT")
+    private String controllerSignatureUrl;
+
+    @Column(name = "board_seal_url", columnDefinition = "TEXT")
+    private String boardSealUrl;
+
+    @Column(name = "board_logo_url", columnDefinition = "TEXT")
+    private String boardLogoUrl;
 
     // ===== RELATIONSHIPS =====
 
@@ -162,6 +171,30 @@ public class Exam {
 
     public void setApplications(List<ExamApplication> applications) {
         this.applications = applications;
+    }
+
+    public String getControllerSignatureUrl() {
+        return controllerSignatureUrl;
+    }
+
+    public void setControllerSignatureUrl(String controllerSignatureUrl) {
+        this.controllerSignatureUrl = controllerSignatureUrl;
+    }
+
+    public String getBoardSealUrl() {
+        return boardSealUrl;
+    }
+
+    public void setBoardSealUrl(String boardSealUrl) {
+        this.boardSealUrl = boardSealUrl;
+    }
+
+    public String getBoardLogoUrl() {
+        return boardLogoUrl;
+    }
+
+    public void setBoardLogoUrl(String boardLogoUrl) {
+        this.boardLogoUrl = boardLogoUrl;
     }
 
     @Override

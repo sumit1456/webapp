@@ -28,11 +28,20 @@ public class StudentProfileController {
     public StudentProfileDTO getStudentProfile(@RequestParam long id) {
         return sr.getProfileDTO(id);
     }
+    
+    
+    @GetMapping("/studentprofile/studentId/{id}")
+    public StudentProfileDTO getStudentProfilebyStudentId(@PathVariable long id) {
+        return sr.getProfileByStudentId(id);
+    }
+
 
     @GetMapping("/getAllStudentProfiles")
     public List<StudentProfileDTO> getAllStudentProfiles() {
         return sr.getAllProfileDTOs();
     }
+    
+    
 
     @PostMapping("/addStudentProfile")
     public ResponseEntity<StudentProfileDTO> addStudentProfile(

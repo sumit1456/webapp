@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,17 +43,11 @@ public class SchoolController {
 				.status(HttpStatus.CREATED)
 				.body(savedSchool);
 	}
-	
-	
+
 	@PutMapping("/schools")
-	public ResponseEntity<SchoolDTO> addSchoolv2(
-			@RequestParam Long centreId,
-			@RequestBody School school) {
-		return createSchool(centreId, school);
+	public ResponseEntity<SchoolDTO> updateSchool(@RequestBody SchoolDTO dto) {
+		return ResponseEntity.ok(schoolService.updateSchool(dto));
 	}
-	
-	
-	
 
 	@GetMapping("getAllSchools")
 	public ResponseEntity<List<SchoolDTO>> getAllSchools() {
@@ -65,4 +60,10 @@ public class SchoolController {
 			Pageable pageable) {
 		return schoolService.searchSchools(filter, pageable);
 	}
+
+	@GetMapping("/schools/{id}")
+	public ResponseEntity<SchoolDTO> getSchoolById(@PathVariable("id") long id) {
+		return ResponseEntity.ok(schoolService.getSchoolById(id));
+	}
+
 }

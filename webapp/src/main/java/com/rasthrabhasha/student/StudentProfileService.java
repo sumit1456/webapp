@@ -24,6 +24,7 @@ public class StudentProfileService {
 
     public StudentProfileDTO getProfileDTO(long id) {
         StudentProfile profile = profileRepository.findById(id)
+        		
                 .orElseThrow(() -> new EntityNotFoundException("StudentProfile not found"));
         return mapToDTO(profile);
     }
@@ -112,4 +113,9 @@ public class StudentProfileService {
                 profile.getStudent() != null ? profile.getStudent().getStudentId() : null
         );
     }
+
+	public StudentProfileDTO getProfileByStudentId(long id) {
+	    StudentProfile profile = profileRepository.findByStudent_StudentId(id).orElseThrow(()-> new RuntimeException("Invalid Student id"));
+		return mapToDTO(profile);
+	}
 }

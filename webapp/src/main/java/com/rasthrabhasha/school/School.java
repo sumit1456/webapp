@@ -56,7 +56,7 @@ public class School {
 	@Column(name = "official_email")
 	private String officialEmail;
 
-	@Column(name = "website_url")
+	@Column(name = "website_url", columnDefinition = "TEXT")
 	private String websiteUrl;
 
 	@Column(name = "seating_capacity")
@@ -70,6 +70,12 @@ public class School {
 
 	@jakarta.persistence.Embedded
 	private com.rasthrabhasha.common.Address address;
+
+	@Column(name = "principal_signature_url", columnDefinition = "TEXT")
+	private String principalSignatureUrl;
+
+	@Column(name = "school_stamp_url", columnDefinition = "TEXT")
+	private String schoolStampUrl;
 
 	public Long getSchoolId() {
 		return schoolId;
@@ -189,6 +195,22 @@ public class School {
 
 	public void setAddress(com.rasthrabhasha.common.Address address) {
 		this.address = address;
+	}
+
+	public String getPrincipalSignatureUrl() {
+		return principalSignatureUrl;
+	}
+
+	public void setPrincipalSignatureUrl(String principalSignatureUrl) {
+		this.principalSignatureUrl = principalSignatureUrl;
+	}
+
+	public String getSchoolStampUrl() {
+		return schoolStampUrl;
+	}
+
+	public void setSchoolStampUrl(String schoolStampUrl) {
+		this.schoolStampUrl = schoolStampUrl;
 	}
 
 	public ExamCentre getExamCentre() {

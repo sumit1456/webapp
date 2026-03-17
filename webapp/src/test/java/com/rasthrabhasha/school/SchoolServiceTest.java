@@ -41,6 +41,8 @@ class SchoolServiceTest {
         school = new School();
         school.setSchoolId(10L);
         school.setSchoolName("DPS");
+        school.setSchoolCode("SCH001");
+        school.setPrincipalName("John Doe");
         school.setExamCentre(examCentre);
     }
 
@@ -53,6 +55,8 @@ class SchoolServiceTest {
 
         assertNotNull(dto);
         assertEquals("DPS", dto.getSchoolName());
+        assertEquals("SCH001", dto.getSchoolCode());
+        assertEquals("John Doe", dto.getPrincipalName());
         assertEquals(1L, dto.getCentreId());
         assertEquals("Delhi Centre", dto.getCentreName());
         verify(schoolRepository).save(school);
@@ -73,6 +77,7 @@ class SchoolServiceTest {
 
         assertEquals(1, dtos.size());
         assertEquals("DPS", dtos.get(0).getSchoolName());
+        assertEquals("SCH001", dtos.get(0).getSchoolCode());
     }
 
     @Test
@@ -83,5 +88,26 @@ class SchoolServiceTest {
 
         assertEquals(1, schools.size());
         assertEquals("DPS", schools.get(0).getSchoolName());
+    }
+
+    @Test
+    void updateSchool_updatesFieldsAndSaves() {
+        SchoolDTO updateDto = new SchoolDTO();
+        updateDto.setSchoolId(10L);
+        updateDto.setSchoolName("Updated DPS");
+        updateDto.setSchoolCode("SCH999");
+        updateDto.setPrincipalName("Jane Smith");
+        updateDto.setCentreId(1L);
+
+        when(schoolRepository.findById(10L)).thenReturn(Optional.of(school));
+        when(schoolRepository.save(any(School.class))).thenReturn(school);
+
+        SchoolDTO resultDto = schoolService.updateSchool(updateDto);
+
+        assertNotNull(resultDto);
+        assertEquals("Updated DPS", school.getSchoolName());
+        assertEquals("SCH999", school.getSchoolCode());
+        assertEquals("Jane Smith", school.getPrincipalName());
+        verify(schoolRepository).save(school);
     }
 }

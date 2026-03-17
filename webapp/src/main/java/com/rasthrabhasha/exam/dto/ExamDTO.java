@@ -114,4 +114,32 @@ public class ExamDTO {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    private String controllerSignatureUrl;
+    private String boardSealUrl;
+    private String boardLogoUrl;
+
+    public String getControllerSignatureUrl() {
+        return controllerSignatureUrl;
+    }
+
+    public void setControllerSignatureUrl(String controllerSignatureUrl) {
+        this.controllerSignatureUrl = controllerSignatureUrl;
+    }
+
+    public String getBoardSealUrl() {
+        return boardSealUrl;
+    }
+
+    public void setBoardSealUrl(String boardSealUrl) {
+        this.boardSealUrl = boardSealUrl;
+    }
+
+    public String getBoardLogoUrl() {
+        return boardLogoUrl;
+    }
+
+    public void setBoardLogoUrl(String boardLogoUrl) {
+        this.boardLogoUrl = boardLogoUrl;
+    }
 }

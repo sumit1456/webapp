@@ -42,11 +42,27 @@ public class SchoolService {
 	}
 
 	private SchoolDTO mapToDTO(School s) {
-		return new SchoolDTO(
+		SchoolDTO dto = new SchoolDTO(
 				s.getSchoolId(),
 				s.getSchoolName(),
 				s.getExamCentre() != null ? s.getExamCentre().getCentreId() : null,
 				s.getExamCentre() != null ? s.getExamCentre().getCentreName() : null);
+		dto.setSchoolCode(s.getSchoolCode());
+		dto.setBoardAffiliation(s.getBoardAffiliation());
+		dto.setMediumOfInstruction(s.getMediumOfInstruction());
+		dto.setEstablishmentYear(s.getEstablishmentYear());
+		dto.setPrincipalName(s.getPrincipalName());
+		dto.setPrincipalContactNumber(s.getPrincipalContactNumber());
+		dto.setSecondaryContactNumber(s.getSecondaryContactNumber());
+		dto.setOfficialEmail(s.getOfficialEmail());
+		dto.setWebsiteUrl(s.getWebsiteUrl());
+		dto.setSeatingCapacity(s.getSeatingCapacity());
+		dto.setNumberOfClassrooms(s.getNumberOfClassrooms());
+		dto.setCctvAvailable(s.getCctvAvailable());
+		dto.setAddress(s.getAddress());
+		dto.setPrincipalSignatureUrl(s.getPrincipalSignatureUrl());
+		dto.setSchoolStampUrl(s.getSchoolStampUrl());
+		return dto;
 	}
 
 	public List<School> getAllSchools() {
@@ -70,5 +86,43 @@ public class SchoolService {
 		Page<SchoolDTO> page = schoolRepository.findAll(spec, pageable)
 				.map(this::mapToDTO);
 		return new PageResponse<>(page);
+	}
+	
+	public SchoolDTO getSchoolById(long id) {
+		
+		School school = schoolRepository.findById(id).orElseThrow(() -> new RuntimeException("School id does not exist"));
+		return mapToDTO(school);
+	}
+
+	public SchoolDTO updateSchool(SchoolDTO dto) {
+		School school = schoolRepository.findById(dto.getSchoolId())
+				.orElseThrow(() -> new RuntimeException("School id does not exist"));
+
+		school.setSchoolName(dto.getSchoolName());
+		school.setSchoolCode(dto.getSchoolCode());
+		school.setBoardAffiliation(dto.getBoardAffiliation());
+		school.setMediumOfInstruction(dto.getMediumOfInstruction());
+		school.setEstablishmentYear(dto.getEstablishmentYear());
+		school.setPrincipalName(dto.getPrincipalName());
+		school.setPrincipalContactNumber(dto.getPrincipalContactNumber());
+		school.setSecondaryContactNumber(dto.getSecondaryContactNumber());
+		school.setOfficialEmail(dto.getOfficialEmail());
+		school.setWebsiteUrl(dto.getWebsiteUrl());
+		school.setSeatingCapacity(dto.getSeatingCapacity());
+		school.setNumberOfClassrooms(dto.getNumberOfClassrooms());
+		school.setCctvAvailable(dto.getCctvAvailable());
+		school.setAddress(dto.getAddress());
+		school.setPrincipalSignatureUrl(dto.getPrincipalSignatureUrl());
+		school.setSchoolStampUrl(dto.getSchoolStampUrl());
+
+		if (dto.getCentreId() != null && (school.getExamCentre() == null
+				|| !school.getExamCentre().getCentreId().equals(dto.getCentreId()))) {
+			ExamCentre examCentre = examCentreRepository.findById(dto.getCentreId())
+					.orElseThrow(() -> new RuntimeException("Exam Centre not found"));
+			school.setExamCentre(examCentre);
+		}
+
+		School updatedSchool = schoolRepository.save(school);
+		return mapToDTO(updatedSchool);
 	}
 }
