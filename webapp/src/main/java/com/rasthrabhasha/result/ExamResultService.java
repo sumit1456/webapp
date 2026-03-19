@@ -33,16 +33,22 @@ public class ExamResultService {
 
 	@CacheEvict(value = "results", allEntries = true)
 	public ExamResultDTO createResult(ExamResult er) {
+		if (er.getApplication() == null || er.getApplication().getApplicationId() == null) {
+			throw new IllegalArgumentException("Exam Application information is required");
+		}
 
-		ExamApplication axamApplication = ear.findByApplicationId(er.getApplication().getApplicationId());
-		if (axamApplication == null)
+		long applicationId = er.getApplication().getApplicationId();
+		ExamApplication examApplication = ear.findByApplicationId(applicationId);
+		if (examApplication == null)
 			throw new EntityNotFoundException("Invalid Application Id");
-
-		er.setApplication(axamApplication);
+		
+		er.setApplication(examApplication);
 		ExamResult res = err.save(er);
-
+		
+		examApplication.setExamResult(res);
+		ear.save(examApplication);
+		
 		return mapToDTO(res);
-
 	}
 
 	public ExamResult getExamResult(long applicationId) {
@@ -95,7 +101,9 @@ public class ExamResultService {
 		dto.setPublishedAt(er.getPublishedAt());
 		dto.setTotalMarks(er.getTotalMarks());
 		dto.setPercentage(er.getPercentage());
-		dto.setStudentName(stu.getFirstName()+" "+stu.getMiddleName()+" "+stu.getLastName());
+		if (stu != null) {
+			dto.setStudentName(stu.getFirstName() + " " + (stu.getMiddleName() != null ? stu.getMiddleName() + " " : "") + stu.getLastName());
+		}
 	
 
 		return dto;

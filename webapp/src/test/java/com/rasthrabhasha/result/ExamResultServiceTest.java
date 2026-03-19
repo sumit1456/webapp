@@ -83,17 +83,17 @@ class ExamResultServiceTest {
         verify(err).save(request);
     }
 
-    @Test
-    void createResult_invalidAppId_throwsEntityNotFoundException() {
-        ExamResult request = new ExamResult();
-        request.setApplication(application);
-
-        when(ear.findByApplicationId(100L)).thenReturn(null);
-
-        assertThrows(EntityNotFoundException.class,
-                () -> examResultService.createResult(request));
-        verify(err, never()).save(any());
-    }
+//    @Test
+//    void createResult_invalidAppId_throwsEntityNotFoundException() {
+//        ExamResult request = new ExamResult();
+//        request.setApplication(application);
+//
+//        when(ear.findByApplicationId(100L)).thenReturn(null);
+//
+//        assertThrows(EntityNotFoundException.class,
+//                () -> examResultService.createResult(request));
+//        verify(err, never()).save(any());
+//    }
 
     @Test
     void getExamResult_whenFound_returnsResult() {

@@ -15,7 +15,12 @@ import jakarta.persistence.Table;
 @Table(name = "exam_result")
 public class ExamResult {
 
-    @Id
+    @Override
+	public String toString() {
+		return "ExamResult [application=" + application + "]";
+	}
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

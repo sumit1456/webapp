@@ -32,5 +32,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long>, J
     void deleteByApplication_Exam_ExamNo(Long examNo);
 
     void deleteByApplication_Student_StudentId(Long studentId);
+    
+  
 
 }

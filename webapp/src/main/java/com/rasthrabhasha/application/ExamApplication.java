@@ -10,6 +10,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 
 @Entity
 public class ExamApplication {
@@ -29,6 +32,9 @@ public class ExamApplication {
 
     @Column(name = "is_hall_ticket_generated", columnDefinition = "boolean default false")
     private Boolean isHallTicketGenerated = false;
+
+    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private com.rasthrabhasha.result.ExamResult examResult;
     
     
     public Long getApplicationId() {
@@ -93,6 +99,14 @@ public class ExamApplication {
 
 	public void setIsHallTicketGenerated(Boolean isHallTicketGenerated) {
 		this.isHallTicketGenerated = isHallTicketGenerated;
+	}
+
+	public com.rasthrabhasha.result.ExamResult getExamResult() {
+		return examResult;
+	}
+
+	public void setExamResult(com.rasthrabhasha.result.ExamResult examResult) {
+		this.examResult = examResult;
 	}
 
 	@ManyToOne

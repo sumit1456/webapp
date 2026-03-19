@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,15 +22,18 @@ public class ExamResultController {
         @Autowired
         ExamResultService es;
 
-        @PostMapping("/addExamResult")
-        public ResponseEntity<ExamResultDTO> addExamResult(@RequestBody ExamResult er) {
-                return createExamResult(er);
-        }
 
         @PostMapping("/exam-results")
-        public ResponseEntity<ExamResultDTO> createExamResult(@RequestBody ExamResult er) {
-                return ResponseEntity.ok().body(es.createResult(er));
+        public ResponseEntity<ExamResultDTO> createExamResult(
+            @RequestBody ExamResult er, 
+            @RequestParam("applicationId") long applicationId
+        ) {
+            com.rasthrabhasha.application.ExamApplication app = new com.rasthrabhasha.application.ExamApplication();
+            app.setApplicationId(applicationId);
+            er.setApplication(app);
+            return ResponseEntity.ok().body(es.createResult(er));
         }
+
 
         @GetMapping("/getExamResult")
         public ExamResultDTO getExamResult(@RequestParam long applicationId) {

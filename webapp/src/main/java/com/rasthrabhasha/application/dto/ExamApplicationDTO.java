@@ -94,4 +94,14 @@ public class ExamApplicationDTO {
     public void setIsHallTicketGenerated(Boolean isHallTicketGenerated) {
         this.isHallTicketGenerated = isHallTicketGenerated;
     }
+
+    private Boolean hasResult;
+
+    public Boolean getHasResult() {
+        return hasResult;
+    }
+
+    public void setHasResult(Boolean hasResult) {
+        this.hasResult = hasResult;
+    }
 }

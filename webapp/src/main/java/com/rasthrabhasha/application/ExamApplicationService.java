@@ -120,6 +120,7 @@ public class ExamApplicationService {
 		dto.setRollNo(ea.getRollNo());
 		dto.setCentreId(ea.getCentreId());
 		dto.setIsHallTicketGenerated(ea.getIsHallTicketGenerated());
+		dto.setHasResult(ea.getExamResult() != null);
 		return dto;
 	}
 
