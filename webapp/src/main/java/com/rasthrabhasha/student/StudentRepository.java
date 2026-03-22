@@ -14,6 +14,8 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
 
 	Optional<Student> findByStudentId(long studentId);
 
+	Optional<Student> findByEmailAndPassword(String email, String password);
+
 	@Query("""
 			    SELECT DISTINCT s
 			    FROM Student s
