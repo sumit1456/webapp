@@ -29,7 +29,7 @@ public class SchoolService {
 	@Autowired
 	private ExamCentreRepository examCentreRepository;
 
-	@CacheEvict(value = "schools", allEntries = true)
+	@CacheEvict(value = { "schools", "analytics_summary", "analytics_counts" }, allEntries = true)
 	public SchoolDTO addSchool(Long centreId, School school) {
 
 		ExamCentre examCentre = examCentreRepository.findById(centreId)
@@ -94,6 +94,7 @@ public class SchoolService {
 		return mapToDTO(school);
 	}
 
+	@CacheEvict(value = { "schools", "analytics_summary", "analytics_counts" }, allEntries = true)
 	public SchoolDTO updateSchool(SchoolDTO dto) {
 		School school = schoolRepository.findById(dto.getSchoolId())
 				.orElseThrow(() -> new RuntimeException("School id does not exist"));
@@ -124,5 +125,10 @@ public class SchoolService {
 
 		School updatedSchool = schoolRepository.save(school);
 		return mapToDTO(updatedSchool);
+	}
+	
+	@CacheEvict(value = { "schools", "analytics_summary", "analytics_counts" }, allEntries = true)
+	public void deleteSchool(long id) {
+		schoolRepository.deleteById(id);
 	}
 }

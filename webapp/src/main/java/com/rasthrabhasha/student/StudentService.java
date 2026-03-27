@@ -67,7 +67,7 @@ public class StudentService {
 				.collect(Collectors.toList());
 	}
 
-	@CacheEvict(value = "students", allEntries = true)
+	@CacheEvict(value = { "students", "analytics_summary", "analytics_counts" }, allEntries = true)
 	public StudentDTO addStudent(long school_id, Student st) {
 		School school = school_repo.findById(school_id)
 				.orElseThrow(() -> new RuntimeException("School was not found"));
@@ -128,7 +128,7 @@ public class StudentService {
 		return new PageResponse<>(page);
 	}
 
-	@CacheEvict(value = "students", allEntries = true)
+	@CacheEvict(value = { "students", "analytics_summary", "analytics_counts" }, allEntries = true)
 	@Transactional
 	public StudentDTO updateStudent(long id, Student updatedStudent) {
 		Student student = student_repo.findById(id)
@@ -154,7 +154,7 @@ public class StudentService {
 	@Autowired
 	ExamResultRepository examResultRepo;
 
-	@CacheEvict(value = "students", allEntries = true)
+	@CacheEvict(value = { "students", "analytics_summary", "analytics_counts" }, allEntries = true)
 	@Transactional
 	public void deleteStudent(long id) {
 		examResultRepo.deleteByApplication_Student_StudentId(id);

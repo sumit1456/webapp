@@ -30,7 +30,7 @@ public class ExamCentreService {
 	@Autowired
 	private RegionRepository regionRepository;
 
-	@CacheEvict(value = "examCentres", allEntries = true)
+	@CacheEvict(value = { "examCentres", "analytics_summary", "analytics_counts" }, allEntries = true)
 	public ExamCentreDTO addExamCentre(Long regionId, ExamCentre examCentre) {
 		Region region = regionRepository.findById(regionId)
 				.orElseThrow(() -> new RuntimeException("Region not found"));
@@ -72,7 +72,7 @@ public class ExamCentreService {
 		return new PageResponse<>(page);
 	}
 
-	@CacheEvict(value = "examCentres", allEntries = true)
+	@CacheEvict(value = { "examCentres", "analytics_summary", "analytics_counts" }, allEntries = true)
 	@Transactional
 	public ExamCentreDTO updateExamCentre(long id, ExamCentre updatedCentre) {
 		ExamCentre ec = examCentreRepository.findById(id)
@@ -84,7 +84,7 @@ public class ExamCentreService {
 		return mapToDTO(examCentreRepository.save(ec));
 	}
 
-	@CacheEvict(value = "examCentres", allEntries = true)
+	@CacheEvict(value = { "examCentres", "analytics_summary", "analytics_counts" }, allEntries = true)
 	@Transactional
 	public void deleteExamCentre(long id) {
 		examCentreRepository.deleteById(id);

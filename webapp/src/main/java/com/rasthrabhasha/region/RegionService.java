@@ -25,7 +25,7 @@ public class RegionService {
 	private RegionRepository regionRepository;
     
 	
-	@CacheEvict(value = "regions", allEntries = true)
+	@CacheEvict(value = { "regions", "analytics_summary", "analytics_counts" }, allEntries = true)
 	public RegionDTO addRegion(Region region) {
 		Region savedRegion = regionRepository.save(region);
 		return mapToDTO(savedRegion);
@@ -57,7 +57,7 @@ public class RegionService {
 	    return new PageResponse<>(page);
 	}
 
-	@CacheEvict(value = "regions", allEntries = true)
+	@CacheEvict(value = { "regions", "analytics_summary", "analytics_counts" }, allEntries = true)
 	@Transactional
 	public RegionDTO updateRegion(long id, Region updatedRegion) {
 		Region region = regionRepository.findById(id)
@@ -67,7 +67,7 @@ public class RegionService {
 		return mapToDTO(savedRegion);
 	}
 
-	@CacheEvict(value = "regions", allEntries = true)
+	@CacheEvict(value = { "regions", "analytics_summary", "analytics_counts" }, allEntries = true)
 	@Transactional
 	public void deleteRegion(long id) {
 		regionRepository.deleteById(id);

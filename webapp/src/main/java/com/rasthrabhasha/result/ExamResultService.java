@@ -85,6 +85,27 @@ public class ExamResultService {
 		return new PageResponse<>(page);
 	}
 
+	@CacheEvict(value = "results", allEntries = true)
+	public ExamResultDTO updateResult(long id, ExamResult er) {
+		ExamResult existing = err.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Exam Result not found with id: " + id));
+
+		existing.setResultData(er.getResultData());
+		existing.setTotalMarks(er.getTotalMarks());
+		existing.setPercentage(er.getPercentage());
+		existing.setPublishedAt(er.getPublishedAt());
+
+		return mapToDTO(err.save(existing));
+	}
+
+	@CacheEvict(value = "results", allEntries = true)
+	public void deleteResult(long id) {
+		if (!err.existsById(id)) {
+			throw new EntityNotFoundException("Exam Result not found with id: " + id);
+		}
+		err.deleteById(id);
+	}
+
 	private ExamResultDTO mapToDTO(ExamResult er) {
 
 		ExamResultDTO dto = new ExamResultDTO();

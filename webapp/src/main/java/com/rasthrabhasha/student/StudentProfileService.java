@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
@@ -22,6 +24,7 @@ public class StudentProfileService {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Cacheable(value = "profiles", key = "#id")
     public StudentProfileDTO getProfileDTO(long id) {
         StudentProfile profile = profileRepository.findById(id)
         		
@@ -36,6 +39,7 @@ public class StudentProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = { "profiles", "students", "analytics_summary", "analytics_counts" }, allEntries = true)
     public StudentProfileDTO addProfile(long studentId, StudentProfile profile) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found"));
@@ -54,6 +58,7 @@ public class StudentProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = { "profiles", "students", "analytics_summary", "analytics_counts" }, allEntries = true)
     public StudentProfileDTO updateProfile(long id, StudentProfile updatedProfile) {
         StudentProfile profile = profileRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("StudentProfile not found with id: " + id));
@@ -80,6 +85,7 @@ public class StudentProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = { "profiles", "students", "analytics_summary", "analytics_counts" }, allEntries = true)
     public void deleteProfile(long id) {
         StudentProfile profile = profileRepository.findById(id).orElse(null);
         if (profile != null && profile.getStudent() != null) {
@@ -114,6 +120,7 @@ public class StudentProfileService {
         );
     }
 
+	@Cacheable(value = "profiles", key = "'student:' + #id")
 	public StudentProfileDTO getProfileByStudentId(long id) {
 	    StudentProfile profile = profileRepository.findByStudent_StudentId(id).orElseThrow(()-> new RuntimeException("Invalid Student id"));
 		return mapToDTO(profile);
