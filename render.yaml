@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: exam-management-webapp
+    runtime: java
+    buildCommand: cd webapp && ./mvnw clean package -DskipTests
+    startCommand: cd webapp && java -jar target/webapp-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_DRIVER
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CACHE_TIME_TO_LIVE
+        sync: false
+      - key: MINIO_URL
+        sync: false
+      - key: MINIO_ACCESS_KEY
+        sync: false
+      - key: MINIO_SECRET_KEY
+        sync: false
+      - key: MINIO_BUCKET
+        sync: false
