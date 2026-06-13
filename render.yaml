@@ -1,9 +1,7 @@
 services:
   - type: web
     name: exam-management-webapp
-    runtime: java
-    buildCommand: cd webapp && ./mvnw clean package -DskipTests
-    startCommand: cd webapp && java -jar target/webapp-0.0.1-SNAPSHOT.jar
+    dockerfilePath: webapp/webapp/Dockerfile
     envVars:
       - key: DB_URL
         sync: false
