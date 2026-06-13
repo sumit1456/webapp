@@ -46,6 +46,7 @@ public class ExamResultService {
 		ExamResult res = err.save(er);
 		
 		examApplication.setExamResult(res);
+		examApplication.setStatus("RESULT_PUBLISHED");
 		ear.save(examApplication);
 		
 		return mapToDTO(res);

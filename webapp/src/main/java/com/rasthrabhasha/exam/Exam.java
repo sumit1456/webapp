@@ -13,6 +13,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 public class Exam {
 
@@ -29,10 +32,12 @@ public class Exam {
     private double exam_fees;
 
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String papers;
     // [{"code":"P1","name":"Paper I","maxMarks":100}, ...]
 
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String exam_details;
     // exam-specific descriptive details
 

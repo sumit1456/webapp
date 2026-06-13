@@ -14,6 +14,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 public class ExamApplication {
 
@@ -112,9 +115,10 @@ public class ExamApplication {
 	@ManyToOne
     private Student student;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private String formData;   // exam-specific fields
 
-    private String status;     // SUBMITTED / APPROVED / REJECTED
+    private String status;     // SUBMITTED / APPROVED / REJECTED / RESULT_PUBLISHED
 }
 

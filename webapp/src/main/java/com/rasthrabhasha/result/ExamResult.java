@@ -11,6 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 @Table(name = "exam_result")
 public class ExamResult {
@@ -30,6 +33,7 @@ public class ExamResult {
     private ExamApplication application;
 
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String resultData;
 
     private LocalDateTime publishedAt;
