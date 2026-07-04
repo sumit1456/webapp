@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    image: sumit067hatekar/resumemaker-webapp:latest
+    container_name: resumemaker-webapp
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
