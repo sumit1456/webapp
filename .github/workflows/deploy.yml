@@ -45,10 +45,10 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          # Assuming the Dockerfile is inside the webapp directory
-          context: ./webapp
+          context: .
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
+
 
   deploy:
     name: Deploy to Amazon EC2
@@ -56,7 +56,22 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Step 1: Execute commands on the remote EC2 instance using SSH
+      # Step 1: Get the code from the repository (needed for the docker-compose-backend.yml file)
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Copy docker-compose-backend.yml to the EC2 instance using SCP
+      - name: Copy docker-compose file via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "projects/uems/docker-compose-backend.yml"
+          target: "projects/uems"
+          strip_components: 2
+
+      # Step 3: Execute commands on the remote EC2 instance using SSH
       - name: Deploy via SSH to EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -64,19 +79,25 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}     # e.g., ubuntu or ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}           # Your .pem key contents
           script: |
-            # 1. Stop the currently running container (if it exists)
-            sudo docker stop ${{ env.CONTAINER_NAME }} || true
-            sudo docker rm ${{ env.CONTAINER_NAME }} || true
+            # Navigate to the project directory
+            cd projects/uems
             
-            # 2. Pull the newest image from Docker Hub
-            sudo docker pull ${{ env.DOCKER_IMAGE }}:latest
+            # Determine if docker-compose or docker compose is available
+            if sudo docker compose version >/dev/null 2>&1; then
+              DOCKER_COMPOSE="sudo docker compose"
+            else
+              DOCKER_COMPOSE="sudo docker-compose"
+            fi
             
-            # 3. Run the new container, exposing port 8080
-            sudo docker run -d \
-              --name ${{ env.CONTAINER_NAME }} \
-              -p 8080:8080 \
-              --restart unless-stopped \
-              ${{ env.DOCKER_IMAGE }}:latest
+            # Stop and remove the old service container
+            $DOCKER_COMPOSE -f docker-compose-backend.yml down || true
             
-            # 4. Clean up old unused images to save space on EC2
+            # Pull the newest image from Docker Hub
+            $DOCKER_COMPOSE -f docker-compose-backend.yml pull
+            
+            # Run the container in detached mode (defined on port 8082 in the compose file)
+            $DOCKER_COMPOSE -f docker-compose-backend.yml up -d
+            
+            # Clean up old unused images to save space on EC2
             sudo docker image prune -f
+
