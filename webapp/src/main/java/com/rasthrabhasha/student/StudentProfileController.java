@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
+import com.rasthrabhasha.common.enums.Permission;
+import com.rasthrabhasha.common.util.PermissionUtils;
 import com.rasthrabhasha.student.dto.StudentProfileDTO;
 import org.springframework.data.domain.Pageable;
 import com.rasthrabhasha.common.dto.PageResponse;
@@ -25,57 +27,69 @@ public class StudentProfileController {
     private StudentProfileService sr;
 
     @GetMapping("/getStudentProfile")
-    public StudentProfileDTO getStudentProfile(@RequestParam long id) {
-        return sr.getProfileDTO(id);
-    }
-    
-    
-    @GetMapping("/studentprofile/studentId/{id}")
-    public StudentProfileDTO getStudentProfilebyStudentId(@PathVariable long id) {
-        return sr.getProfileByStudentId(id);
+    public ResponseEntity<?> getStudentProfile(@RequestParam long id) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+        if (err != null) return err;
+        return ResponseEntity.ok(sr.getProfileDTO(id));
     }
 
+    @GetMapping("/studentprofile/studentId/{id}")
+    public ResponseEntity<?> getStudentProfilebyStudentId(@PathVariable long id) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+        if (err != null) return err;
+        return ResponseEntity.ok(sr.getProfileByStudentId(id));
+    }
 
     @GetMapping("/getAllStudentProfiles")
-    public List<StudentProfileDTO> getAllStudentProfiles() {
-        return sr.getAllProfileDTOs();
+    public ResponseEntity<?> getAllStudentProfiles() {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+        if (err != null) return err;
+        return ResponseEntity.ok(sr.getAllProfileDTOs());
     }
-    
-    
 
     @PostMapping("/addStudentProfile")
-    public ResponseEntity<StudentProfileDTO> addStudentProfile(
+    public ResponseEntity<?> addStudentProfile(
             @RequestParam Long studentId,
             @RequestBody StudentProfile profile) {
         return createStudentProfile(studentId, profile);
     }
 
     @PostMapping("/studentProfiles")
-    public ResponseEntity<StudentProfileDTO> createStudentProfile(
+    public ResponseEntity<?> createStudentProfile(
             @RequestParam Long studentId,
             @RequestBody StudentProfile profile) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+        if (err != null) return err;
         StudentProfileDTO dto = sr.addProfile(studentId, profile);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @GetMapping("/getStudentProfileById")
-    public ResponseEntity<StudentProfileDTO> getStudentProfileById(@RequestParam long id) {
+    public ResponseEntity<?> getStudentProfileById(@RequestParam long id) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+        if (err != null) return err;
         return ResponseEntity.status(HttpStatus.OK).body(sr.getProfileDTO(id));
     }
 
     @GetMapping("/studentProfiles")
-    public PageResponse<StudentProfileDTO> searchStudentProfiles(Pageable pageable) {
-        return sr.searchProfiles(pageable);
+    public ResponseEntity<?> searchStudentProfiles(Pageable pageable) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+        if (err != null) return err;
+        return ResponseEntity.ok(sr.searchProfiles(pageable));
     }
 
     @PutMapping("/studentProfiles/{id}")
-    public ResponseEntity<StudentProfileDTO> updateStudentProfile(@PathVariable long id,
+    public ResponseEntity<?> updateStudentProfile(@PathVariable long id,
             @RequestBody StudentProfile profile) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+        if (err != null) return err;
         return ResponseEntity.ok(sr.updateProfile(id, profile));
     }
 
     @DeleteMapping("/studentProfiles/{id}")
-    public ResponseEntity<Void> deleteStudentProfile(@PathVariable long id) {
+    public ResponseEntity<?> deleteStudentProfile(@PathVariable long id) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+        if (err != null) return err;
         sr.deleteProfile(id);
         return ResponseEntity.noContent().build();
     }

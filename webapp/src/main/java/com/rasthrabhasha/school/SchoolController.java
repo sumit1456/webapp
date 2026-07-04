@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rasthrabhasha.common.enums.Permission;
+import com.rasthrabhasha.common.util.PermissionUtils;
 import com.rasthrabhasha.school.dto.SchoolDTO;
 import com.rasthrabhasha.school.dto.SchoolFilterDTO;
 import org.springframework.data.domain.Page;
@@ -27,50 +29,57 @@ public class SchoolController {
 	SchoolService schoolService;
 
 	@PostMapping("/addSchool")
-	public ResponseEntity<SchoolDTO> addSchool(
+	public ResponseEntity<?> addSchool(
 			@RequestParam Long centreId,
 			@RequestBody School school) {
 		return createSchool(centreId, school);
 	}
 
 	@PostMapping("/schools")
-	public ResponseEntity<SchoolDTO> createSchool(
+	public ResponseEntity<?> createSchool(
 			@RequestParam Long centreId,
 			@RequestBody School school) {
-
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_SCHOOLS);
+		if (err != null) return err;
 		SchoolDTO savedSchool = schoolService.addSchool(centreId, school);
-
-		return ResponseEntity
-				.status(HttpStatus.CREATED)
-				.body(savedSchool);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedSchool);
 	}
 
 	@PutMapping("/schools")
-	public ResponseEntity<SchoolDTO> updateSchool(@RequestBody SchoolDTO dto) {
+	public ResponseEntity<?> updateSchool(@RequestBody SchoolDTO dto) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_SCHOOLS);
+		if (err != null) return err;
 		return ResponseEntity.ok(schoolService.updateSchool(dto));
 	}
 
 	@GetMapping("getAllSchools")
-	public ResponseEntity<List<SchoolDTO>> getAllSchools() {
+	public ResponseEntity<?> getAllSchools() {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_SCHOOLS);
+		if (err != null) return err;
 		return ResponseEntity.ok(schoolService.getAllSchoolsDTOs());
 	}
 
 	@GetMapping("/schools")
-	public PageResponse<SchoolDTO> searchSchools(
+	public ResponseEntity<?> searchSchools(
 			SchoolFilterDTO filter,
 			Pageable pageable) {
-		return schoolService.searchSchools(filter, pageable);
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_SCHOOLS);
+		if (err != null) return err;
+		return ResponseEntity.ok(schoolService.searchSchools(filter, pageable));
 	}
 
 	@GetMapping("/schools/{id}")
-	public ResponseEntity<SchoolDTO> getSchoolById(@PathVariable("id") long id) {
+	public ResponseEntity<?> getSchoolById(@PathVariable("id") long id) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_SCHOOLS);
+		if (err != null) return err;
 		return ResponseEntity.ok(schoolService.getSchoolById(id));
 	}
 
 	@DeleteMapping("/schools/{id}")
-	public ResponseEntity<Void> deleteSchool(@PathVariable("id") long id) {
+	public ResponseEntity<?> deleteSchool(@PathVariable("id") long id) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_SCHOOLS);
+		if (err != null) return err;
 		schoolService.deleteSchool(id);
 		return ResponseEntity.noContent().build();
 	}
-
 }

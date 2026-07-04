@@ -1,4 +1,4 @@
-package com.rasthrabhasha.admin;
+package com.rasthrabhasha.examofficer;
 
 import java.util.List;
 
@@ -14,49 +14,48 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rasthrabhasha.admin.dto.AdminDTO;
-import com.rasthrabhasha.admin.dto.DashboardStatsDTO;
 import com.rasthrabhasha.common.enums.Permission;
 import com.rasthrabhasha.common.util.PermissionUtils;
+import com.rasthrabhasha.examofficer.dto.ExamOfficerDTO;
 
 @RestController
-@RequestMapping("/admin")
-public class AdminController {
+@RequestMapping("/exam-officer")
+public class ExamOfficerController {
 
 	@Autowired
-	private AdminService adminService;
+	private ExamOfficerService examOfficerService;
 
 	@PostMapping
-	public ResponseEntity<?> createAdmin(@RequestBody AdminDTO dto) {
+	public ResponseEntity<?> createExamOfficer(@RequestBody ExamOfficerDTO dto) {
 		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_USERS);
 		if (err != null) return err;
-		AdminDTO created = adminService.createAdmin(dto);
+		ExamOfficerDTO created = examOfficerService.createExamOfficer(dto);
 		return new ResponseEntity<>(created, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getAdminById(@PathVariable long id) {
+	public ResponseEntity<?> getExamOfficerById(@PathVariable long id) {
 		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_DASHBOARD);
 		if (err != null) return err;
-		AdminDTO admin = adminService.getAdminById(id);
-		if (admin == null) {
+		ExamOfficerDTO officer = examOfficerService.getExamOfficerById(id);
+		if (officer == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(admin);
+		return ResponseEntity.ok(officer);
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getAllAdmins() {
+	public ResponseEntity<?> getAllExamOfficers() {
 		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_DASHBOARD);
 		if (err != null) return err;
-		return ResponseEntity.ok(adminService.getAllAdmins());
+		return ResponseEntity.ok(examOfficerService.getAllExamOfficers());
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateAdmin(@PathVariable long id, @RequestBody AdminDTO dto) {
+	public ResponseEntity<?> updateExamOfficer(@PathVariable long id, @RequestBody ExamOfficerDTO dto) {
 		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_USERS);
 		if (err != null) return err;
-		AdminDTO updated = adminService.updateAdmin(id, dto);
+		ExamOfficerDTO updated = examOfficerService.updateExamOfficer(id, dto);
 		if (updated == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -64,20 +63,13 @@ public class AdminController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteAdmin(@PathVariable long id) {
+	public ResponseEntity<?> deleteExamOfficer(@PathVariable long id) {
 		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_USERS);
 		if (err != null) return err;
-		boolean deleted = adminService.deleteAdmin(id);
+		boolean deleted = examOfficerService.deleteExamOfficer(id);
 		if (!deleted) {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.noContent().build();
-	}
-
-	@GetMapping("/getStats")
-	public ResponseEntity<?> getStats() {
-		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_DASHBOARD);
-		if (err != null) return err;
-		return null;
 	}
 }

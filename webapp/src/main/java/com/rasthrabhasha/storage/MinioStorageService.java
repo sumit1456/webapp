@@ -59,21 +59,27 @@ public class MinioStorageService implements StorageService {
                             .contentType(file.getContentType())
                             .build()
             );
-            
-            // For a production environment, you might want to return a public URL.
-            // Here we return a presigned URL that is valid for a long time (e.g., 7 days) 
-            // OR you can configure the bucket to be public and return the direct URL.
-            // Using presigned URL for now as it's safer.
+            // Return just the object key, not the presigned URL
+            return fileName;
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading file to MinIO", e);
+        }
+    }
+
+    @Override
+    public String getFileUrl(String objectName) {
+        try {
+            // Generate a fresh presigned URL with 7-day expiry
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(bucket)
-                            .object(fileName)
+                            .object(objectName)
                             .expiry(60 * 60 * 24 * 7) // 7 days
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Error uploading file to MinIO", e);
+            throw new RuntimeException("Error generating presigned URL", e);
         }
     }
     @Override

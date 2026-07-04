@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rasthrabhasha.common.enums.Permission;
+import com.rasthrabhasha.common.util.PermissionUtils;
 import com.rasthrabhasha.result.dto.ExamResultDTO;
 import com.rasthrabhasha.result.dto.ExamResultFilterDTO;
 import org.springframework.data.domain.Page;
@@ -24,52 +26,61 @@ public class ExamResultController {
         @Autowired
         ExamResultService es;
 
-
         @PostMapping("/exam-results")
-        public ResponseEntity<ExamResultDTO> createExamResult(
-            @RequestBody ExamResult er, 
+        public ResponseEntity<?> createExamResult(
+            @RequestBody ExamResult er,
             @RequestParam("applicationId") long applicationId
         ) {
-            com.rasthrabhasha.application.ExamApplication app = new com.rasthrabhasha.application.ExamApplication();
-            app.setApplicationId(applicationId);
-            er.setApplication(app);
-            return ResponseEntity.ok().body(es.createResult(er));
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.PUBLISH_RESULTS);
+                if (err != null) return err;
+                com.rasthrabhasha.application.ExamApplication app = new com.rasthrabhasha.application.ExamApplication();
+                app.setApplicationId(applicationId);
+                er.setApplication(app);
+                return ResponseEntity.ok().body(es.createResult(er));
         }
-
 
         @GetMapping("/getExamResult")
-        public ExamResultDTO getExamResult(@RequestParam long applicationId) {
-                return es.getResultDTO(applicationId);
+        public ResponseEntity<?> getExamResult(@RequestParam long applicationId) {
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_RESULTS);
+                if (err != null) return err;
+                return ResponseEntity.ok(es.getResultDTO(applicationId));
         }
 
-        // Endpoint for Admin Dashboard
         @GetMapping("/getAllResults")
-        public List<ExamResultDTO> getAllResults() {
-                return es.getAllResultsDTOs();
+        public ResponseEntity<?> getAllResults() {
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_RESULTS);
+                if (err != null) return err;
+                return ResponseEntity.ok(es.getAllResultsDTOs());
         }
 
-        // --- ADD THIS NEW ENDPOINT FOR STUDENT DASHBOARD ---
         @GetMapping("/getStudentResults")
-        public List<ExamResultDTO> getStudentResults(@RequestParam long studentId) {
-                return es.getStudentResultsDTOs(studentId);
+        public ResponseEntity<?> getStudentResults(@RequestParam long studentId) {
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_RESULTS);
+                if (err != null) return err;
+                return ResponseEntity.ok(es.getStudentResultsDTOs(studentId));
         }
 
         @GetMapping("/exam-results")
-        public PageResponse<ExamResultDTO> searchExamResults(
+        public ResponseEntity<?> searchExamResults(
                         ExamResultFilterDTO filter,
                         Pageable pageable) {
-                return es.searchExamResults(filter, pageable);
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_RESULTS);
+                if (err != null) return err;
+                return ResponseEntity.ok(es.searchExamResults(filter, pageable));
         }
 
         @PutMapping("/exam-results/{id}")
-        public ResponseEntity<ExamResultDTO> updateExamResult(@PathVariable long id, @RequestBody ExamResult er) {
-            return ResponseEntity.ok(es.updateResult(id, er));
+        public ResponseEntity<?> updateExamResult(@PathVariable long id, @RequestBody ExamResult er) {
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.PUBLISH_RESULTS);
+                if (err != null) return err;
+                return ResponseEntity.ok(es.updateResult(id, er));
         }
 
         @DeleteMapping("/exam-results/{id}")
-        public ResponseEntity<Void> deleteExamResult(@PathVariable long id) {
-            es.deleteResult(id);
-            return ResponseEntity.noContent().build();
+        public ResponseEntity<?> deleteExamResult(@PathVariable long id) {
+                ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.PUBLISH_RESULTS);
+                if (err != null) return err;
+                es.deleteResult(id);
+                return ResponseEntity.noContent().build();
         }
-
 }

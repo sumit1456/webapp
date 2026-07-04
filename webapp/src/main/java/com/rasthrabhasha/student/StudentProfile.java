@@ -58,7 +58,7 @@ public class StudentProfile {
 		this.previousExamRollNO = previousExamRollNO;
 	}
 
-	@Column
+	@Column(name = "previous_exam_roll_no")
     String previousExamRollNO;
 
     @Column

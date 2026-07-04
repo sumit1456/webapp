@@ -39,7 +39,7 @@ public class Admin {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long admin_id;
 
-	@Column
+	@Column(unique = true, nullable = false)
 	private String username;
 
 	@Column

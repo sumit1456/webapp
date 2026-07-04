@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.data.domain.Pageable;
 import com.rasthrabhasha.common.dto.PageResponse;
+import com.rasthrabhasha.common.enums.Permission;
+import com.rasthrabhasha.common.util.PermissionUtils;
 
 import com.rasthrabhasha.application.dto.ExamApplicationDTO;
 import com.rasthrabhasha.application.dto.ExamApplicationFilterDTO;
@@ -25,62 +27,67 @@ public class ExamApplicationController {
     @Autowired
     ExamApplicationService eas;
 
-    // Create / submit a new application (or update if already exists for same
-    // student+exam)
     @PostMapping("/exam-applications")
-    public ResponseEntity<ExamApplicationDTO> createApplication(@RequestBody ExamApplicationDTO dto) {
-    	System.out.println(dto.getExamNo());
-    	System.out.println(dto.getStudentId());
+    public ResponseEntity<?> createApplication(@RequestBody ExamApplicationDTO dto) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.SUBMIT_APPLICATION);
+        if (err != null) return err;
+        System.out.println(dto.getExamNo());
+        System.out.println(dto.getStudentId());
         return eas.fillForm(dto);
     }
 
-    // Get a single application by applicationId and examNo
     @GetMapping("/exam-applications-byId")
-    public ExamApplicationDTO getForm(@RequestParam long applicationId, @RequestParam long examNo) {
-        return eas.getApplicationDTO(applicationId, examNo);
+    public ResponseEntity<?> getForm(@RequestParam long applicationId, @RequestParam long examNo) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_APPLICATIONS);
+        if (err != null) return err;
+        return ResponseEntity.ok(eas.getApplicationDTO(applicationId, examNo));
     }
 
-    // legacy
-    // Get all applications (for admin dashboard)
     @GetMapping("/getAllApplications/{id}")
-    public List<ExamApplicationDTO> getAllApplications() {
-        return eas.getAllApplicationsDTOs();
+    public ResponseEntity<?> getAllApplications() {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_APPLICATIONS);
+        if (err != null) return err;
+        return ResponseEntity.ok(eas.getAllApplicationsDTOs());
     }
 
-    // Search/filter applications with pagination
     @GetMapping("/exam-applications")
-    public PageResponse<ExamApplicationDTO> searchApplication(
+    public ResponseEntity<?> searchApplication(
             ExamApplicationFilterDTO filter,
             Pageable pageable) {
-        return eas.searchApplications(filter, pageable);
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_APPLICATIONS);
+        if (err != null) return err;
+        return ResponseEntity.ok(eas.searchApplications(filter, pageable));
     }
 
-    // Update an existing application's formData and/or status
     @PutMapping("/exam-applications/{id}")
-    public ExamApplicationDTO updateApplication(
+    public ResponseEntity<?> updateApplication(
             @PathVariable long id,
             @RequestBody ExamApplicationDTO dto) {
-        return eas.updateApplication(id, dto);
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_APPLICATIONS);
+        if (err != null) return err;
+        return ResponseEntity.ok(eas.updateApplication(id, dto));
     }
 
-    // Delete an application and its associated results
     @DeleteMapping("/exam-applications/{id}")
-    public ResponseEntity<Void> deleteApplication(@PathVariable long id) {
+    public ResponseEntity<?> deleteApplication(@PathVariable long id) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_APPLICATIONS);
+        if (err != null) return err;
         eas.deleteApplication(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Generate hall ticket details (rollNo, centreId, flag)
     @PostMapping("/exam-applications/{id}/generate-hall-ticket")
-    public ExamApplicationDTO generateHallTicket(@PathVariable Long id) {
-        return eas.generateHallTicket(id);
+    public ResponseEntity<?> generateHallTicket(@PathVariable Long id) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_APPLICATIONS);
+        if (err != null) return err;
+        return ResponseEntity.ok(eas.generateHallTicket(id));
     }
 
-    // Batch generate hall tickets for all APPROVED applications
     @PostMapping("/exam-applications/batch-generate-hall-tickets")
-    public ResponseEntity<String> batchGenerateHallTickets() {
+    public ResponseEntity<?> batchGenerateHallTickets() {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_APPLICATIONS);
+        if (err != null) return err;
         eas.batchGenerateHallTickets();
         return ResponseEntity.ok("Batch hall ticket generation process completed.");
     }
-
 }

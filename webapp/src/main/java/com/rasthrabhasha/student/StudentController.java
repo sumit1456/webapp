@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rasthrabhasha.common.enums.Permission;
+import com.rasthrabhasha.common.util.PermissionUtils;
 import com.rasthrabhasha.student.dto.StudentDTO;
 import com.rasthrabhasha.student.dto.StudentFilterDTO;
 import org.springframework.data.domain.Page;
@@ -27,58 +29,66 @@ public class StudentController {
 	StudentService sr;
 
 	@GetMapping("/getStudent")
-	public StudentDTO getStudent(long id) {
-		return sr.getStudentDTO(id);
+	public ResponseEntity<?> getStudent(long id) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+		if (err != null) return err;
+		return ResponseEntity.ok(sr.getStudentDTO(id));
 	}
 
 	@GetMapping("/getAllStudents")
-	public List<StudentDTO> getAllStudents() {
-		return sr.getAllStudentsDTOs();
+	public ResponseEntity<?> getAllStudents() {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+		if (err != null) return err;
+		return ResponseEntity.ok(sr.getAllStudentsDTOs());
 	}
 
 	@PostMapping("/addStudent")
-	public ResponseEntity<StudentDTO> addStudent(
-			@RequestParam Long schoolId, // Matches ?schoolId= in frontend
+	public ResponseEntity<?> addStudent(
+			@RequestParam Long schoolId,
 			@RequestBody Student st) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+		if (err != null) return err;
 		return createStudent(schoolId, st);
 	}
 
 	@PostMapping("/students")
-	public ResponseEntity<StudentDTO> createStudent(
+	public ResponseEntity<?> createStudent(
 			@RequestParam Long schoolId,
 			@RequestBody Student st) {
-
-		// Save via Service (assuming sr is your service/repository)
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+		if (err != null) return err;
 		StudentDTO dto = sr.addStudent(schoolId, st);
-
-		// Returns 201 Created with the saved object
 		return ResponseEntity.status(HttpStatus.CREATED).body(dto);
 	}
 
 	@GetMapping("getStudentById")
-	public ResponseEntity<StudentDTO> getStudentById(@RequestParam long student_id) {
-
+	public ResponseEntity<?> getStudentById(@RequestParam long student_id) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+		if (err != null) return err;
 		return ResponseEntity.status(HttpStatus.OK).body(sr.findStudentById(student_id));
-
 	}
 
 	@GetMapping("/students")
-	public PageResponse<StudentDTO> searchStudents(
+	public ResponseEntity<?> searchStudents(
 			StudentFilterDTO filter,
 			Pageable pageable) {
-
-		return sr.searchStudents(filter, pageable);
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_STUDENTS);
+		if (err != null) return err;
+		return ResponseEntity.ok(sr.searchStudents(filter, pageable));
 	}
 
 	@PutMapping("/students/{id}")
-	public ResponseEntity<StudentDTO> updateStudent(@PathVariable long id, @RequestBody Student student) {
+	public ResponseEntity<?> updateStudent(@PathVariable long id, @RequestBody Student student) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+		if (err != null) return err;
 		return ResponseEntity.ok(sr.updateStudent(id, student));
 	}
 
 	@DeleteMapping("/students/{id}")
-	public ResponseEntity<Void> deleteStudent(@PathVariable long id) {
+	public ResponseEntity<?> deleteStudent(@PathVariable long id) {
+		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+		if (err != null) return err;
 		sr.deleteStudent(id);
 		return ResponseEntity.noContent().build();
 	}
-
 }

@@ -1,0 +1,30 @@
+package com.rasthrabhasha.common.enums;
+
+public enum Permission {
+
+    VIEW_STUDENTS,
+    MANAGE_STUDENTS,
+    VIEW_OWN_PROFILE,
+
+    VIEW_EXAMS,
+    CREATE_EXAM,
+    EDIT_EXAM,
+    DELETE_EXAM,
+
+    VIEW_APPLICATIONS,
+    MANAGE_APPLICATIONS,
+    SUBMIT_APPLICATION,
+
+    VIEW_RESULTS,
+    PUBLISH_RESULTS,
+
+    VIEW_SCHOOLS,
+    MANAGE_SCHOOLS,
+    VIEW_REGIONS,
+    MANAGE_REGIONS,
+    VIEW_CENTRES,
+    MANAGE_CENTRES,
+
+    VIEW_DASHBOARD,
+    MANAGE_USERS
+}
