@@ -26,7 +26,7 @@ public class FileUploadController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
-        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.UPLOAD_FILES);
         if (err != null) return err;
         Map<String, String> response = files.stream().collect(Collectors.toMap(
                 MultipartFile::getOriginalFilename,

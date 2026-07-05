@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import com.rasthrabhasha.exception.EntityNotFoundException;
+import com.rasthrabhasha.student.StudentProfile;
 import com.rasthrabhasha.application.ExamApplicationRepository;
 import com.rasthrabhasha.result.ExamResultRepository;
 
@@ -34,6 +35,9 @@ public class StudentService {
 
 	@Autowired
 	SchoolRepository school_repo;
+
+	@Autowired
+	StudentProfileRepository studentProfileRepository;
 
 	public Student getStudent(long id) {
 		return student_repo.findById(id).get();
@@ -67,12 +71,21 @@ public class StudentService {
 				.collect(Collectors.toList());
 	}
 
+	@Transactional
 	@CacheEvict(value = { "students", "analytics_summary", "analytics_counts" }, allEntries = true)
 	public StudentDTO addStudent(long school_id, Student st) {
 		School school = school_repo.findById(school_id)
 				.orElseThrow(() -> new RuntimeException("School was not found"));
 		st.setSchool(school);
 		Student savedStudent = student_repo.save(st);
+
+		StudentProfile profile = new StudentProfile();
+		profile.setStudent(savedStudent);
+		studentProfileRepository.save(profile);
+
+		savedStudent.setHasProfile(true);
+		student_repo.save(savedStudent);
+
 		return mapToDTO(savedStudent);
 	}
 

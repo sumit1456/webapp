@@ -120,9 +120,18 @@ public class StudentProfileService {
         );
     }
 
-	@Cacheable(value = "profiles", key = "'student:' + #id")
+	@Transactional
 	public StudentProfileDTO getProfileByStudentId(long id) {
-	    StudentProfile profile = profileRepository.findByStudent_StudentId(id).orElseThrow(()-> new RuntimeException("Invalid Student id"));
-		return mapToDTO(profile);
+	    StudentProfile profile = profileRepository.findByStudent_StudentId(id).orElse(null);
+	    if (profile == null) {
+	        Student student = studentRepository.findById(id)
+	                .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + id));
+	        profile = new StudentProfile();
+	        profile.setStudent(student);
+	        profile = profileRepository.save(profile);
+	        student.setHasProfile(true);
+	        studentRepository.save(student);
+	    }
+	    return mapToDTO(profile);
 	}
 }

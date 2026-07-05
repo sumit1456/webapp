@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.rasthrabhasha.common.enums.Permission;
 import com.rasthrabhasha.common.util.PermissionUtils;
 import com.rasthrabhasha.student.dto.StudentProfileDTO;
@@ -25,6 +27,44 @@ public class StudentProfileController {
 
     @Autowired
     private StudentProfileService sr;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @GetMapping("/studentProfiles/me")
+    public ResponseEntity<?> getMyProfile() {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_OWN_PROFILE);
+        if (err != null) return err;
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new com.rasthrabhasha.exception.EntityNotFoundException("Student not found"));
+        return ResponseEntity.ok(sr.getProfileByStudentId(student.getStudentId()));
+    }
+
+    @PostMapping("/studentProfiles/me")
+    public ResponseEntity<?> createMyProfile(@RequestBody StudentProfile profile) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.EDIT_OWN_PROFILE);
+        if (err != null) return err;
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new com.rasthrabhasha.exception.EntityNotFoundException("Student not found"));
+        StudentProfileDTO dto = sr.addProfile(student.getStudentId(), profile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    }
+
+    @PutMapping("/studentProfiles/me")
+    public ResponseEntity<?> updateMyProfile(@RequestBody StudentProfile profile) {
+        ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.EDIT_OWN_PROFILE);
+        if (err != null) return err;
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new com.rasthrabhasha.exception.EntityNotFoundException("Student not found"));
+        StudentProfile existing = student.getProfile();
+        if (existing == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No profile found. Create one first.");
+        }
+        return ResponseEntity.ok(sr.updateProfile(existing.getProfileId(), profile));
+    }
 
     @GetMapping("/getStudentProfile")
     public ResponseEntity<?> getStudentProfile(@RequestParam long id) {

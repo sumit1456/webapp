@@ -44,6 +44,7 @@ public class SecurityConfig {
                     "/getStudentProfile",
                     "/getAllStudentProfiles",
                     "/studentProfiles",
+                    "/studentProfiles/me",
                     "/studentprofile/**",
                     "/addStudentProfile",
                     "/getStudentProfileById",

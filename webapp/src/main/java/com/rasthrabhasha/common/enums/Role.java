@@ -11,7 +11,9 @@ public enum Role {
         Permission.VIEW_EXAMS,
         Permission.SUBMIT_APPLICATION,
         Permission.VIEW_OWN_PROFILE,
-        Permission.VIEW_RESULTS
+        Permission.VIEW_RESULTS,
+        Permission.UPLOAD_FILES,
+        Permission.EDIT_OWN_PROFILE
     )),
 
     EXAM_OFFICER(EnumSet.of(

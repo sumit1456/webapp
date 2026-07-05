@@ -26,5 +26,7 @@ public enum Permission {
     MANAGE_CENTRES,
 
     VIEW_DASHBOARD,
-    MANAGE_USERS
+    MANAGE_USERS,
+    UPLOAD_FILES,
+    EDIT_OWN_PROFILE
 }
