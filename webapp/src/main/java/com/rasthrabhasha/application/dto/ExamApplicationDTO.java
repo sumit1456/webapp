@@ -11,6 +11,7 @@ public class ExamApplicationDTO {
     private String rollNo;
     private Long centreId;
     private Boolean isHallTicketGenerated;
+    private String appliedAt;
 
     public ExamApplicationDTO() {
     }
@@ -93,6 +94,14 @@ public class ExamApplicationDTO {
 
     public void setIsHallTicketGenerated(Boolean isHallTicketGenerated) {
         this.isHallTicketGenerated = isHallTicketGenerated;
+    }
+
+    public String getAppliedAt() {
+        return appliedAt;
+    }
+
+    public void setAppliedAt(String appliedAt) {
+        this.appliedAt = appliedAt;
     }
 
     private Boolean hasResult;

@@ -54,24 +54,13 @@ public class ExamApplicationService {
 		Optional<ExamApplication> existingApp = exam_app_repo.findByStudentAndExam(stu, exam);
 
 		if (existingApp.isPresent()) {
-			ExamApplication appToUpdate = existingApp.get();
-
-			if (dto.getFormData() != null) {
-				appToUpdate.setFormData(dto.getFormData());
-			}
-
-			if (dto.getStatus() != null) {
-				appToUpdate.setStatus(dto.getStatus());
-			} else if (appToUpdate.getStatus() == null) {
-				appToUpdate.setStatus("SUBMITTED");
-			}
-
-			savedApp = exam_app_repo.save(appToUpdate);
+			throw new IllegalArgumentException("An application already exists for this student and exam");
 		} else {
 			ExamApplication application = new ExamApplication();
 			application.setStudent(stu);
 			application.setExam(exam);
 			application.setFormData(dto.getFormData());
+			application.setAppliedAt(java.time.LocalDateTime.now());
 
 			if (dto.getStatus() != null) {
 				application.setStatus(dto.getStatus());
@@ -121,6 +110,9 @@ public class ExamApplicationService {
 		dto.setCentreId(ea.getCentreId());
 		dto.setIsHallTicketGenerated(ea.getIsHallTicketGenerated());
 		dto.setHasResult(ea.getExamResult() != null);
+		if (ea.getAppliedAt() != null) {
+			dto.setAppliedAt(ea.getAppliedAt().toString());
+		}
 		return dto;
 	}
 

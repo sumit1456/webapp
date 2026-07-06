@@ -3,6 +3,8 @@ package com.rasthrabhasha.application;
 import com.rasthrabhasha.exam.Exam;
 import com.rasthrabhasha.student.Student;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -120,5 +122,16 @@ public class ExamApplication {
     private String formData;   // exam-specific fields
 
     private String status;     // SUBMITTED / APPROVED / REJECTED / RESULT_PUBLISHED
+
+    @Column(name = "applied_at")
+    private LocalDateTime appliedAt;
+
+    public LocalDateTime getAppliedAt() {
+        return appliedAt;
+    }
+
+    public void setAppliedAt(LocalDateTime appliedAt) {
+        this.appliedAt = appliedAt;
+    }
 }
 
