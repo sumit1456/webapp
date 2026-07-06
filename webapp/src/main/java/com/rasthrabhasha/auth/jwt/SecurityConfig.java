@@ -48,8 +48,7 @@ public class SecurityConfig {
                     "/studentprofile/**",
                     "/addStudentProfile",
                     "/getStudentProfileById",
-                    "/exam-applications/**",
-                    "/getAllApplications/**",
+
                     "/exam-results/**",
                     "/getExamResult",
                     "/getAllResults",

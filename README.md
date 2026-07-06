@@ -1,438 +1,325 @@
-# MRB Exam Management System - Backend
+# MRB Exam Management — Backend
 
-A comprehensive Spring Boot backend application for the Maharashtra Rashtrabhasha Sabha (MRB) Exam Management System. This system provides RESTful APIs for managing Hindi language proficiency examinations (Rashtrabhasha Pravin Pariksha) including student registration, exam applications, result publishing, and certificate generation.
+Spring Boot REST API for the **Maharashtra Rashtrabhasha Sabha (MRB)** exam system. Powers student registration, exam configuration, applications, hall tickets, results, analytics, and document storage.
 
-## 🚀 Project Overview
+**Frontend:** [`../MRB-DEMO-FRONTEND-main`](../MRB-DEMO-FRONTEND-main)
 
-This is a robust, scalable backend service built with Spring Boot 3.2.2, Java 17, and MySQL. It provides comprehensive REST APIs for:
+**Source root:** `webapp/` (Maven project lives in the nested `webapp/` folder)
 
-- Student management and authentication
-- Exam creation and configuration
-- Exam application processing
-- Result publishing and management
-- School, region, and exam center administration
-- Analytics and reporting
-- Document storage with MinIO
+---
 
-## ✨ Key Features
+## Quick start
 
-### Core Features
-- **RESTful APIs**: Comprehensive REST endpoints for all entities
-- **Pagination**: Built-in pagination support for large datasets
-- **Search & Filtering**: Advanced search capabilities with JPA Specifications
-- **Caching**: Redis-based caching for improved performance
-- **File Storage**: MinIO integration for document storage
-- **Cross-Origin Support**: CORS configuration for frontend integration
-- **Exception Handling**: Centralized exception handling with custom responses
+```bash
+cd webapp/webapp
+cp .env.example .env   # if present; otherwise set env vars (see Configuration)
+./mvnw spring-boot:run # http://localhost:8080
+./mvnw test
+```
 
-### Entity Management
-- **Students**: Complete CRUD operations with profile management
-- **Exams**: Exam creation with papers, fees, schedules, and rules
-- **Applications**: Exam application submission and approval workflow
-- **Results**: Result publishing with marksheet data
-- **Schools**: School management with region association
-- **Regions**: Geographic region management
-- **Exam Centres**: Examination center configuration
-- **Admins**: Administrator user management
+**Requirements:** Java 17, Maven 3.6+, PostgreSQL, Redis (optional), MinIO (optional)
+
+Health check: `GET /ping`
+
+---
+
+## What this API does
+
+### Core capabilities
+
+| Area | Description |
+|------|-------------|
+| **Students** | Register, search, update, delete; link to schools |
+| **Student profiles** | Extended profile data per student |
+| **Auth** | Student login (`email` + password) |
+| **Exams** | Exam definitions: papers, fees, schedule, status |
+| **Applications** | Submit, search, update status; hall ticket + roll number generation |
+| **Results** | Publish marks; query by student or filters |
+| **Master data** | Regions → Exam centres → Schools hierarchy |
+| **Analytics** | Dashboard summary and entity counts |
+| **File storage** | Upload/delete documents via MinIO |
+| **Admin stats** | Legacy stats endpoint |
+
+### Cross-cutting features
+
+- **Pagination** on list/search endpoints (`page`, `size`, `sort`)
+- **Filtering** via JPA Specifications + filter DTOs per domain
+- **DTO mapping** in service layer (entities never leak raw to API)
+- **Redis caching** (configurable; can be disabled)
+- **CORS** for frontend origins
+- **Centralized exceptions** via `@RestControllerAdvice`
+
+---
+
+## Architecture
+
+Layered **domain packages** under `com.rasthrabhasha`:
+
+```
+HTTP Request
+     │
+     ▼
+Controller   ← REST mapping, validation, pagination params
+     │
+     ▼
+Service      ← Business logic, DTO mapping, workflows
+     │
+     ▼
+Repository   ← Spring Data JPA
+     │
+     ▼
+Entity       ← Hibernate / PostgreSQL
+```
+
+Optional: **MinioStorageService** ← **FileUploadController** for `/files/*`
+
+### Package map
+
+| Package | Responsibility |
+|---------|----------------|
+| `student` | `Student`, `StudentProfile`, CRUD + search |
+| `auth` | `AuthService.verifyStudent` → `POST /auth/student/login` |
+| `exam` | Exam CRUD + search |
+| `application` | Applications, hall ticket batch/single generation |
+| `result` | Result CRUD + student result lookup |
+| `region` | Region CRUD |
+| `examcentre` | Exam centre CRUD (belongs to region) |
+| `school` | School CRUD (belongs to exam centre) |
+| `analytics` | Summary + count endpoints |
+| `admin` | Admin stats |
+| `storage` | MinIO upload/delete |
+| `health` | `/ping` |
+| `exception` | Global error handling |
+| `common` | Shared DTOs (`PageResponse`), `Address` embeddable |
+
+Each domain typically contains:
+
+```
+Entity.java
+Repository.java
+Service.java          ← mapToDTO, search*, CRUD
+Controller.java
+dto/                  ← Request/response DTOs
+specification/        ← Dynamic query filters (where used)
+```
+
+### Important workflows
+
+**Hall ticket generation** (`ExamApplicationService`):
+
+1. Admin triggers `POST /exam-applications/{id}/generate-hall-ticket` or batch endpoint.
+2. Service assigns roll number, updates application status, returns DTO.
+
+**Application lifecycle:**
+
+- Student submits via `POST /exam-applications`.
+- Admin searches/filters via `GET /exam-applications`.
+- Status transitions: `PENDING` → `APPROVED` / `REJECTED`.
+
+**Data hierarchy:**
+
+```
+Region
+  └── ExamCentre
+        └── School
+              └── Student
+                    └── ExamApplication → ExamResult
+```
+
+---
+
+## API reference (primary routes)
+
+Legacy routes (`/getAllStudents`, `/addSchool`, etc.) exist alongside RESTful ones. Prefer the REST paths for new clients.
+
+### Auth
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/auth/student/login` | Student login |
+
+### Students
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/students?schoolId=` | Create student |
+| GET | `/students` | Search (paginated) |
+| GET | `/students/{id}` | Get by ID (via legacy `getStudentById` too) |
+| PUT | `/students/{id}` | Update |
+| DELETE | `/students/{id}` | Delete |
+
+### Student profiles
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET/POST/PUT/DELETE | `/studentProfiles`, `/studentProfiles/{id}` | CRUD + search |
+| GET | `/studentprofile/studentId/{id}` | Profile by student |
+
+### Exams
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/exams` | Create |
+| GET | `/exams` | Search (paginated) |
+| GET | `/exams/{id}` | Get one |
+| GET | `/exams/all` | List all (legacy) |
+| PUT | `/exams/{id}` | Update |
+| DELETE | `/exams/{id}` | Delete |
+
+### Applications
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/exam-applications` | Submit application |
+| GET | `/exam-applications` | Search (paginated) |
+| PUT | `/exam-applications/{id}` | Update (status, etc.) |
+| DELETE | `/exam-applications/{id}` | Delete |
+| POST | `/exam-applications/{id}/generate-hall-ticket` | Single hall ticket |
+| POST | `/exam-applications/batch-generate-hall-tickets` | Batch hall tickets |
+
+### Results
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/exam-results` | Create result |
+| GET | `/exam-results` | Search (paginated) |
+| GET | `/getStudentResults` | Results for a student |
+| PUT | `/exam-results/{id}` | Update |
+| DELETE | `/exam-results/{id}` | Delete |
+
+### Master data
+
+| Resource | Base path |
+|----------|-----------|
+| Regions | `/regions` |
+| Exam centres | `/exam-centres` |
+| Schools | `/schools`, `/schools/{id}` |
 
 ### Analytics
-- Student statistics by region
-- Application trends and metrics
-- Result distribution analysis
-- Dashboard analytics summary
 
-## 🛠️ Technology Stack
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/summary` | Dashboard summary |
+| GET | `/counts/school/{id}/students` | Students in school |
+| GET | `/counts/region/{id}/students` | Students in region |
+| GET | `/counts/region/{id}/schools` | Schools in region |
+| GET | `/counts/region/{id}/exam-centres` | Centres in region |
+| GET | `/counts/exam-centre/{id}/schools` | Schools in centre |
+| GET | `/counts/exam-centre/{id}/students` | Students in centre |
 
-- **Framework**: Spring Boot 3.2.2
-- **Java Version**: Java 17
-- **Database**: MySQL (Clever Cloud)
-- **ORM**: Spring Data JPA with Hibernate
-- **Caching**: Spring Cache with Redis
-- **File Storage**: MinIO 8.5.7
-- **Build Tool**: Maven
-- **API Documentation**: RESTful design (Swagger can be added)
+### Files
 
-## 📁 Project Structure
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/files/upload` | Upload to MinIO |
+| DELETE | `/files/upload` | Delete from MinIO |
 
-```
-src/main/java/com/rasthrabhasha/
-├── WebappApplication.java       # Main Spring Boot application entry point
-├── CorsConfig.java              # CORS configuration for frontend
-├── admin/                      # Admin user management
-│   ├── Admin.java              # Admin entity
-│   ├── AdminController.java   # Admin REST endpoints
-│   ├── AdminRepository.java    # Admin JPA repository
-│   ├── AdminService.java       # Admin business logic
-│   └── dto/                    # Admin data transfer objects
-├── analytics/                  # Analytics and reporting
-│   ├── AnalyticsController.java # Analytics REST endpoints
-│   ├── AnalyticsService.java    # Analytics business logic
-│   └── dto/                     # Analytics data transfer objects
-├── application/                # Exam application management
-│   ├── ExamApplication.java      # Application entity
-│   ├── ExamApplicationController.java # Application REST endpoints
-│   ├── ExamApplicationRepository.java # Application JPA repository
-│   ├── ExamApplicationService.java    # Application business logic
-│   ├── specification/           # JPA specifications for filtering
-│   └── dto/                     # Application data transfer objects
-├── auth/                       # Authentication utilities
-├── common/                     # Shared components
-│   ├── Address.java            # Address entity (embedded)
-│   └── dto/                    # Common DTOs (PageResponse)
-├── exam/                       # Exam management
-│   ├── Exam.java               # Exam entity
-│   ├── ExamController.java     # Exam REST endpoints
-│   ├── ExamRepository.java     # Exam JPA repository
-│   ├── ExamService.java        # Exam business logic
-│   ├── specification/          # JPA specifications for filtering
-│   └── dto/                    # Exam data transfer objects
-├── examcentre/                 # Exam center management
-│   ├── ExamCentre.java         # Exam center entity
-│   ├── ExamCentreController.java # Exam center REST endpoints
-│   ├── ExamCentreRepository.java # Exam center JPA repository
-│   ├── ExamCentreService.java    # Exam center business logic
-│   ├── specification/           # JPA specifications for filtering
-│   └── dto/                    # Exam center data transfer objects
-├── exception/                  # Exception handling
-├── redis/                      # Redis configuration
-├── region/                     # Region management
-│   ├── Region.java             # Region entity
-│   ├── RegionController.java   # Region REST endpoints
-│   ├── RegionRepository.java   # Region JPA repository
-│   ├── RegionService.java      # Region business logic
-│   ├── specification/          # JPA specifications for filtering
-│   └── dto/                    # Region data transfer objects
-├── result/                     # Result management
-│   ├── ExamResult.java         # Result entity
-│   ├── ExamResultController.java # Result REST endpoints
-│   ├── ExamResultRepository.java # Result JPA repository
-│   ├── ExamResultService.java    # Result business logic
-│   ├── specification/           # JPA specifications for filtering
-│   └── dto/                    # Result data transfer objects
-├── school/                     # School management
-│   ├── School.java             # School entity
-│   ├── SchoolController.java   # School REST endpoints
-│   ├── SchoolRepository.java   # School JPA repository
-│   ├── SchoolService.java      # School business logic
-│   ├── specification/          # JPA specifications for filtering
-│   └── dto/                    # School data transfer objects
-├── storage/                    # MinIO file storage
-├── student/                    # Student management
-│   ├── Student.java            # Student entity
-│   ├── StudentController.java  # Student REST endpoints
-│   ├── StudentRepository.java  # Student JPA repository
-│   ├── StudentService.java     # Student business logic
-│   ├── StudentProfile.java     # Student profile entity
-│   ├── StudentProfileController.java # Profile REST endpoints
-│   ├── StudentProfileRepository.java # Profile JPA repository
-│   ├── StudentProfileService.java    # Profile business logic
-│   ├── specification/         # JPA specifications for filtering
-│   └── dto/                    # Student data transfer objects
-└── webapp/                     # Additional webapp utilities
-
-src/main/resources/
-└── application.properties      # Application configuration
-```
-
-## 📄 Main Components Explained
-
-### WebappApplication.java
-- **Purpose**: Main Spring Boot application entry point
-- **Functionality**: Bootstraps the Spring Boot application with caching enabled
-- **Key Features**: 
-  - `@SpringBootApplication` annotation for auto-configuration
-  - `@EnableCaching` for Redis cache support
-  - Runs on default port 8080
-
-### StudentController.java
-- **Purpose**: REST API endpoints for student management
-- **Endpoints**:
-  - `POST /students` - Create new student
-  - `GET /students` - Search/filter students with pagination
-  - `GET /students/{id}` - Get student by ID
-  - `PUT /students/{id}` - Update student
-  - `DELETE /students/{id}` - Delete student
-  - `GET /getAllStudents` - Get all students (legacy)
-  - `GET /getStudentById` - Get student by ID (legacy)
-- **Key Features**:
-  - Pagination support with Spring Data
-  - Advanced filtering with StudentFilterDTO
-  - School association during creation
-
-### ExamController.java
-- **Purpose**: REST API endpoints for exam management
-- **Endpoints**:
-  - `POST /exams` - Create new exam
-  - `GET /exams` - Search/filter exams with pagination
-  - `GET /exams/{id}` - Get exam by ID
-  - `PUT /exams/{id}` - Update exam
-  - `DELETE /exams/{id}` - Delete exam
-  - `GET /exams/all` - Get all exams (legacy)
-- **Key Features**:
-  - CORS enabled for cross-origin requests
-  - Complex exam configuration (papers, fees, dates)
-  - Pagination and filtering support
-
-### ExamApplicationController.java
-- **Purpose**: REST API endpoints for exam application management
-- **Endpoints**:
-  - `POST /exam-applications` - Submit exam application
-  - `GET /exam-applications` - Search/filter applications with pagination
-  - `GET /exam-applications/{id}` - Get application by ID
-  - `PUT /exam-applications/{id}` - Update application
-  - `DELETE /exam-applications/{id}` - Delete application
-  - `POST /exam-applications/{id}/generate-hall-ticket` - Generate hall ticket
-  - `POST /exam-applications/batch-generate-hall-tickets` - Batch generate hall tickets
-- **Key Features**:
-  - Application workflow management
-  - Hall ticket generation with roll number assignment
-  - Batch operations for efficiency
-  - Status tracking (PENDING, APPROVED, REJECTED)
-
-### AnalyticsController.java
-- **Purpose**: REST API endpoints for analytics and reporting
-- **Endpoints**:
-  - Various analytics endpoints for dashboard metrics
-- **Key Features**:
-  - Student count by region
-  - Application trends
-  - Result distribution analysis
-  - Performance metrics
-
-### Other Controllers
-- **RegionController**: Region management CRUD
-- **SchoolController**: School management CRUD
-- **ExamCentreController**: Exam center management CRUD
-- **ExamResultController**: Result management CRUD
-- **StudentProfileController**: Student profile management
-- **AdminController**: Admin user management
-
-## 🔧 Configuration
-
-### Database Configuration (MySQL)
-- **URL**: Clever Cloud MySQL instance
-- **Hibernate DDL**: Auto-update schema
-- **SQL Logging**: Enabled for debugging
-- **Dialect**: MySQL8Dialect
-
-### Redis Configuration
-- **URL**: Redis Labs instance
-- **Cache Type**: Redis
-- **TTL**: 10 minutes default
-- **Purpose**: Caching frequently accessed data
-
-### MinIO Configuration
-- **URL**: http://100.53.20.30:9000
-- **Access Key**: sumit
-- **Secret Key**: rastrabhasha
-- **Bucket**: student-documents
-- **Purpose**: Document storage (photos, certificates, etc.)
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Java 17 or higher
-- Maven 3.6+
-- MySQL database
-- Redis server (optional, for caching)
-- MinIO server (optional, for file storage)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd webapp
-```
-
-2. Configure database and Redis in `src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/exam_management
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.data.redis.url=redis://localhost:6379
-```
-
-3. Build the project:
-```bash
-./mvnw clean install
-```
-
-4. Run the application:
-```bash
-./mvnw spring-boot:run
-```
-
-The application will start on `http://localhost:8080`
-
-### Available Maven Commands
-
-- `./mvnw clean install` - Clean and build the project
-- `./mvnw spring-boot:run` - Run the application
-- `./mvnw test` - Run tests
-- `./mvnw package` - Package as JAR
-
-## 📡 API Endpoints
-
-### Student Endpoints
-- `POST /students` - Create student
-- `GET /students` - Search students (with pagination)
-- `GET /students/{id}` - Get student by ID
-- `PUT /students/{id}` - Update student
-- `DELETE /students/{id}` - Delete student
-
-### Exam Endpoints
-- `POST /exams` - Create exam
-- `GET /exams` - Search exams (with pagination)
-- `GET /exams/{id}` - Get exam by ID
-- `PUT /exams/{id}` - Update exam
-- `DELETE /exams/{id}` - Delete exam
-
-### Application Endpoints
-- `POST /exam-applications` - Submit application
-- `GET /exam-applications` - Search applications (with pagination)
-- `GET /exam-applications/{id}` - Get application by ID
-- `PUT /exam-applications/{id}` - Update application
-- `DELETE /exam-applications/{id}` - Delete application
-- `POST /exam-applications/{id}/generate-hall-ticket` - Generate hall ticket
-
-### Result Endpoints
-- `POST /exam-results` - Create result
-- `GET /exam-results` - Search results (with pagination)
-- `GET /exam-results/{id}` - Get result by ID
-- `PUT /exam-results/{id}` - Update result
-- `DELETE /exam-results/{id}` - Delete result
-
-### School Endpoints
-- `POST /schools` - Create school
-- `GET /schools` - Search schools (with pagination)
-- `GET /schools/{id}` - Get school by ID
-- `PUT /schools/{id}` - Update school
-- `DELETE /schools/{id}` - Delete school
-
-### Region Endpoints
-- `POST /regions` - Create region
-- `GET /regions` - Search regions (with pagination)
-- `GET /regions/{id}` - Get region by ID
-- `PUT /regions/{id}` - Update region
-- `DELETE /regions/{id}` - Delete region
-
-### Exam Centre Endpoints
-- `POST /exam-centres` - Create exam centre
-- `GET /exam-centres` - Search exam centres (with pagination)
-- `GET /exam-centres/{id}` - Get exam centre by ID
-- `PUT /exam-centres/{id}` - Update exam centre
-- `DELETE /exam-centres/{id}` - Delete exam centre
-
-### Analytics Endpoints
-- `GET /analytics/summary` - Get dashboard summary
-- `GET /analytics/students-by-region` - Get student count by region
-- Additional analytics endpoints as needed
-
-## 🔐 Authentication
-
-Currently, the API does not implement authentication. For production, consider adding:
-- Spring Security with JWT tokens
-- Role-based access control (RBAC)
-- OAuth2 integration
-
-## 📊 Pagination
-
-All list endpoints support pagination using Spring Data's `Pageable` interface:
+### Pagination
 
 ```
 GET /students?page=0&size=20&sort=firstName,asc
 ```
 
-Parameters:
-- `page` - Page number (0-indexed)
-- `size` - Page size
-- `sort` - Sorting criteria (field,direction)
+Filter params vary by domain (see `*FilterDTO` classes in each package).
 
-## 🔍 Search & Filtering
+---
 
-Most endpoints support advanced filtering through DTOs:
-- StudentFilterDTO
-- ExamFilterDTO
-- ExamApplicationFilterDTO
-- ExamResultFilterDTO
+## Tech stack
 
-Filters are implemented using JPA Specifications for dynamic query generation.
+| Layer | Choice |
+|-------|--------|
+| Framework | Spring Boot 3.2.2 |
+| Language | Java 17 |
+| Database | **PostgreSQL** (via env vars) |
+| ORM | Spring Data JPA / Hibernate |
+| Cache | Spring Cache + Redis |
+| Storage | MinIO 8.5.7 |
+| Config | spring-dotenv (`.env` support) |
+| Build | Maven |
+| Deploy | Docker (`Dockerfile`), Render (`render.yaml`) |
 
-## 🧪 Testing
+---
 
-The project includes Spring Boot Test framework. Test files are located in:
-- `src/test/java/com/rasthrabhasha/`
+## Configuration
 
-Run tests:
-```bash
-./mvnw test
-```
-
-## 🐳 Docker Support
-
-A Dockerfile is included for containerization:
-
-```dockerfile
-FROM openjdk:17-jdk-slim
-COPY target/webapp-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
-```
-
-Build and run:
-```bash
-docker build -t mrb-webapp .
-docker run -p 8080:8080 mrb-webapp
-```
-
-## 📝 Environment Variables
-
-Configure the following in `application.properties`:
+Set in `webapp/src/main/resources/application.properties` (values from environment):
 
 ```properties
-# Database
-spring.datasource.url=jdbc:mysql://localhost:3306/exam_management
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.driver-class-name=${DB_DRIVER}
 
-# Redis
-spring.data.redis.url=redis://localhost:6379
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
 
-# MinIO
-minio.url=http://localhost:9000
-minio.access-key=your_access_key
-minio.secret-key=your_secret_key
-minio.bucket=student-documents
+spring.data.redis.url=${REDIS_URL}
+spring.cache.type=
+spring.cache.redis.time-to-live=${CACHE_TIME_TO_LIVE}
+
+minio.url=${MINIO_URL}
+minio.access-key=${MINIO_ACCESS_KEY}
+minio.secret-key=${MINIO_SECRET_KEY}
+minio.bucket=${MINIO_BUCKET}
 ```
 
-## 🔄 Caching Strategy
+Do **not** commit real credentials. Use `.env` locally and platform secrets in production.
 
-Redis caching is configured with:
-- **TTL**: 10 minutes default
-- **Cache Type**: Redis
-- **Purpose**: Cache frequently accessed data (students, exams, schools)
+---
 
-To disable caching, remove `@EnableCaching` annotation or set cache type to none.
+## Project layout
 
-## 📦 Dependencies
+```
+webapp/
+├── Dockerfile
+├── render.yaml
+├── README.md
+└── webapp/                          ← Maven module
+    ├── pom.xml
+    ├── seed_data.py                 ← optional DB seed script
+    └── src/main/java/com/rasthrabhasha/
+        ├── WebappApplication.java   ← @SpringBootApplication, @EnableCaching
+        ├── CorsConfig.java
+        ├── student/
+        ├── auth/
+        ├── exam/
+        ├── application/
+        ├── result/
+        ├── region/
+        ├── examcentre/
+        ├── school/
+        ├── analytics/
+        ├── admin/
+        ├── storage/
+        ├── health/
+        ├── exception/
+        └── common/
+    └── src/test/java/               ← Service + filter DTO tests
+```
 
-Key dependencies from `pom.xml`:
-- Spring Boot Starter Web
-- Spring Boot Starter Data JPA
-- Spring Boot Starter Data Redis
-- Spring Boot Starter Cache
-- MySQL Connector
-- MinIO Java SDK
-- Jackson Datatype JSR310 (for Java 8 date/time)
+---
 
-## 🤝 Contributing
+## Docker
 
-This is a demo/prototype project for the Maharashtra Rashtrabhasha Sabha examination system.
+```bash
+cd webapp/webapp
+./mvnw package
+cd ..
+docker build -t mrb-webapp .
+docker run -p 8080:8080 --env-file webapp/.env mrb-webapp
+```
 
-## 📄 License
+---
 
-Proprietary - Maharashtra Rashtrabhasha Sabha
+## Security (current state)
 
-## 📞 Support
+- **No Spring Security / JWT** in this demo.
+- Student auth is a simple credential check returning a DTO.
+- Admin endpoints are open.
+- For production: add Spring Security, RBAC, password hashing audit, and secure MinIO policies.
 
-For technical support or queries, please contact the development team.
+---
+
+## License
+
+Proprietary — Maharashtra Rashtrabhasha Sabha
