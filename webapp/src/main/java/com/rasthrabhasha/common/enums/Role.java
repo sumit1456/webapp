@@ -13,7 +13,11 @@ public enum Role {
             Permission.VIEW_OWN_PROFILE,
             Permission.VIEW_RESULTS,
             Permission.UPLOAD_FILES,
-            Permission.EDIT_OWN_PROFILE)),
+            Permission.EDIT_OWN_PROFILE,
+            Permission.VIEW_REGIONS,
+            Permission.VIEW_CENTRES,
+            Permission.VIEW_SCHOOLS,
+            Permission.VIEW_APPLICATIONS)),
 
     EXAM_OFFICER(EnumSet.of(
             Permission.VIEW_STUDENTS,
@@ -21,7 +25,11 @@ public enum Role {
             Permission.VIEW_APPLICATIONS,
             Permission.MANAGE_APPLICATIONS,
             Permission.PUBLISH_RESULTS,
-            Permission.VIEW_RESULTS));
+            Permission.VIEW_RESULTS,
+            Permission.VIEW_REGIONS,
+            Permission.VIEW_CENTRES,
+            Permission.VIEW_SCHOOLS,
+            Permission.VIEW_DASHBOARD));
 
     private final Set<Permission> permissions;
 
