@@ -32,6 +32,7 @@ public class ExamResultService {
 	ExamResultRepository err;
 
 	@CacheEvict(value = "results", allEntries = true)
+	@CacheEvict(value = "applications", allEntries = true)
 	public ExamResultDTO createResult(ExamResult er) {
 		if (er.getApplication() == null || er.getApplication().getApplicationId() == null) {
 			throw new IllegalArgumentException("Exam Application information is required");
