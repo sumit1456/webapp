@@ -128,6 +128,7 @@ public class StudentProfileService {
 	                .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + id));
 	        profile = new StudentProfile();
 	        profile.setStudent(student);
+	        profile.setGuardianContact(student.getContact());
 	        profile = profileRepository.save(profile);
 	        student.setHasProfile(true);
 	        studentRepository.save(student);

@@ -1,0 +1,1 @@
+ALTER TABLE exam_application ADD COLUMN IF NOT EXISTS applied_at TIMESTAMP;

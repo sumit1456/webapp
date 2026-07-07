@@ -46,8 +46,6 @@ public class StudentController {
 	public ResponseEntity<?> addStudent(
 			@RequestParam Long schoolId,
 			@RequestBody Student st) {
-		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
-		if (err != null) return err;
 		return createStudent(schoolId, st);
 	}
 
@@ -55,8 +53,6 @@ public class StudentController {
 	public ResponseEntity<?> createStudent(
 			@RequestParam Long schoolId,
 			@RequestBody Student st) {
-		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.MANAGE_STUDENTS);
-		if (err != null) return err;
 		StudentDTO dto = sr.addStudent(schoolId, st);
 		return ResponseEntity.status(HttpStatus.CREATED).body(dto);
 	}

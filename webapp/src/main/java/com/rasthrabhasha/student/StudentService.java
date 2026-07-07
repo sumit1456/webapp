@@ -81,6 +81,7 @@ public class StudentService {
 
 		StudentProfile profile = new StudentProfile();
 		profile.setStudent(savedStudent);
+		profile.setGuardianContact(savedStudent.getContact());
 		studentProfileRepository.save(profile);
 
 		savedStudent.setHasProfile(true);

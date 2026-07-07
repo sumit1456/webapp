@@ -63,8 +63,6 @@ public class SchoolController {
 	public ResponseEntity<?> searchSchools(
 			SchoolFilterDTO filter,
 			Pageable pageable) {
-		ResponseEntity<?> err = PermissionUtils.checkPermission(Permission.VIEW_SCHOOLS);
-		if (err != null) return err;
 		return ResponseEntity.ok(schoolService.searchSchools(filter, pageable));
 	}
 
