@@ -8,9 +8,9 @@ on:
 
 # Define variables we will use across jobs
 env:
-  DOCKER_IMAGE: sumit067hatekar/resumemaker-webapp
+  DOCKER_IMAGE: sumit067hatekar/exam-management-webapp
 
-  CONTAINER_NAME: resumemaker-webapp
+  CONTAINER_NAME: exam-management-webapp
 
 jobs:
   build-and-push:
